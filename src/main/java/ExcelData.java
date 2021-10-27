@@ -6,8 +6,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ExcelData {
 
@@ -53,11 +55,12 @@ public class ExcelData {
                 }
             }
         }
+        // the list for calculating student grade stats
+        List<BigDecimal> scrList = new ArrayList<>();
         //get student arraylist and create pdf
-        ArrayList<String> studentInfo = new ArrayList<>();
-        for (int i = 2; i < rows; ++i) {
+        for (int i = 2; i <= rows; i++) {
             XSSFRow row = sheet.getRow(i);
-            studentInfo.clear();
+            ArrayList<String> studentInfo = new ArrayList<>();
             for (int j = 0; j < cols; ++j) {
                 XSSFCell cell = row.getCell(j);
                 switch(cell.getCellType())
@@ -79,6 +82,10 @@ public class ExcelData {
                     case FORMULA:
                         Double formulaHolder =cell.getNumericCellValue();
                         studentInfo.add(formulaHolder.toString());
+                        // Add score to scrList
+                        if (j == 8) {
+                            scrList.add(new BigDecimal(formulaHolder));
+                        }
                         break;
                     default: studentInfo.add(" - ");
                 }
@@ -86,7 +93,9 @@ public class ExcelData {
             pdfGen.studentPdf(headerInfo,studentInfo,pdfPath,mainPdf);
 
         }
-        mainPdf.removePage(1);
+        // add grade stats to the first page
+        pdfGen.addGradeStats(scrList, mainPdf);
+//        mainPdf.removePage(1);
         mainPdf.close();
     }
 }

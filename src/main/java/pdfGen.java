@@ -17,7 +17,9 @@ import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.List;
 
 public class pdfGen {
     public static void studentPdf(ArrayList<String> headerInfo, ArrayList<String> studentInfo,String Path,PdfDocument pdfDoc) throws IOException{
@@ -272,5 +274,149 @@ public class pdfGen {
         infoText.setFontColor(ColorConstants.BLACK)
                 .setBold()
                 .setCharacterSpacing(1);
+    }
+
+    /**
+     * Add grade stats to the first page<br>
+     *
+     * @param [scrList, mainPdf]
+     * @return void
+     * @author Zihao Long
+     */
+    public static void addGradeStats(List<BigDecimal> scrList, PdfDocument mainPdf) throws IOException {
+        // calculate stats
+        Collections.sort(scrList, BigDecimal::compareTo);
+
+        // Median
+        BigDecimal median;
+        int size = scrList.size();
+        if(size % 2 == 1){
+            median = scrList.get((size - 1) / 2);
+        } else {
+            median = scrList.get(size / 2 - 1).add(scrList.get(size / 2)).divide(new BigDecimal(2)).setScale(1, BigDecimal.ROUND_UP);
+        }
+
+        // Average
+        BigDecimal totalScore = BigDecimal.ZERO;
+        for (BigDecimal score : scrList) {
+            totalScore = totalScore.add(score);
+        }
+        BigDecimal averageScFive = totalScore.divide(new BigDecimal(scrList.size()), 5, BigDecimal.ROUND_UP);
+        BigDecimal average = averageScFive.setScale(1, BigDecimal.ROUND_UP);
+
+        // Standard Deviation
+        double standardDeviation = 0.0;
+        for(BigDecimal score: scrList) {
+            standardDeviation += Math.pow(score.subtract(averageScFive).doubleValue(), 2);
+        }
+        standardDeviation = Math.sqrt(standardDeviation / size);
+        standardDeviation = new BigDecimal(standardDeviation).setScale(1, BigDecimal.ROUND_UP).doubleValue();
+
+        // max and min
+        BigDecimal minScore = scrList.get(0);
+        BigDecimal maxScore = scrList.get(size - 1);
+
+        // count of grades
+        Map<String, Integer> gradeMap = new LinkedHashMap<>();
+        // init grade map
+        gradeMap.put(">=70", 0);
+        gradeMap.put("60-69", 0);
+        gradeMap.put("50-59", 0);
+        gradeMap.put("40-49", 0);
+        gradeMap.put("35-39", 0);
+        gradeMap.put("30-34", 0);
+        gradeMap.put("20-29", 0);
+        gradeMap.put(">=10-19", 0);
+        gradeMap.put("<10", 0);
+
+        for (BigDecimal scr : scrList) {
+            int score = scr.intValue();
+            String key = null;
+            if (score < 10) {
+                key = "<10";
+            } else if (score >= 10 && score <= 19) {
+                key = ">=10-19";
+            } else if (score >= 20 && score <= 29) {
+                key = "20-29";
+            } else if (score >= 30 && score <= 34) {
+                key = "30-34";
+            } else if (score >= 35 && score <= 39) {
+                key = "35-39";
+            } else if (score >= 40 && score <= 49) {
+                key = "40-49";
+            } else if (score >= 50 && score <= 59) {
+                key = "50-59";
+            } else if (score >= 60 && score <= 69) {
+                key = "60-69";
+            } else if (score >= 70) {
+                key = ">=70";
+            }
+            gradeMap.put(key, gradeMap.get(key) + 1);
+        }
+
+        // add values to table
+        Document document = new Document(mainPdf);
+        Color muOrange = new DeviceRgb(251,190,8);
+        Color muGrey = new DeviceRgb(127,127,127);
+        // 2 columns table
+        Table table = new Table(UnitValue.createPercentArray(new float[]{5,5}));
+        table.setHorizontalAlignment(HorizontalAlignment.CENTER)
+                .setBackgroundColor(muGrey)
+                .setFontColor(muOrange)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setWidth(500)
+                .setPageNumber(1);
+
+        // add title
+        Cell titleCell = new Cell(1, 10).add(new Paragraph("Grade Stats"));
+        titleCell.setPaddingTop(10f);
+        titleCell.setPaddingBottom(10f);
+        titleCell.setFontSize(15f);
+        table.addCell(titleCell);
+
+        // add content
+        addCellsTo2ColumnsTable(table, "Median", median.toString());
+        addCellsTo2ColumnsTable(table, "Average", average.toString());
+        addCellsTo2ColumnsTable(table, "Standard Deviation", String.valueOf(standardDeviation));
+        addCellsTo2ColumnsTable(table, "Max", maxScore.toString());
+        addCellsTo2ColumnsTable(table, "Min", minScore.toString());
+        addCellsTo2ColumnsTable(table, "\n", "");
+        addCellsTo2ColumnsTable(table, "Count of grades:", String.valueOf(size));
+        Set<String> gradeKeySet = gradeMap.keySet();
+        for (String key : gradeKeySet) {
+            addCellsTo2ColumnsTable(table, key, gradeMap.get(key).toString());
+        }
+
+        //Colours the page
+        PdfPage coloured = mainPdf.getFirstPage();
+        PdfCanvas canvas = new PdfCanvas(coloured);
+        Rectangle rect = coloured.getPageSize();
+        canvas.saveState()
+                .setFillColor(ColorConstants.GRAY)
+                .rectangle(rect)
+                .fillStroke();
+        //spacing
+        paraLineBreaks(document,1);
+        //add heading
+        addPara(document);
+        addLineBreak(document);
+        paraLineBreaks(document,2);
+        document.add(table);
+    }
+
+    /**
+     * Add cells to the two columns table<br>
+     *
+     * @param [key, value]
+     * @param table
+     * @return void
+     * @author Zihao Long
+     */
+    private static void addCellsTo2ColumnsTable(Table table, String key, String value) {
+        table.addCell(new Cell().add(new Paragraph(key)));
+
+        Paragraph valuePg = new Paragraph(value);
+        valuePg.setFontColor(ColorConstants.WHITE);
+        table.addCell(new Cell().add(valuePg));
     }
 }
