@@ -298,7 +298,7 @@ public class pdfGen {
         if(size % 2 == 1){
             median = scrList.get((size - 1) / 2);
         } else {
-            median = scrList.get(size / 2 - 1).add(scrList.get(size / 2)).divide(new BigDecimal(2)).setScale(1, BigDecimal.ROUND_UP);
+            median = scrList.get(size / 2 - 1).add(scrList.get(size / 2)).divide(new BigDecimal(2));
         }
 
         // Average
@@ -306,16 +306,14 @@ public class pdfGen {
         for (BigDecimal score : scrList) {
             totalScore = totalScore.add(score);
         }
-        BigDecimal averageScFive = totalScore.divide(new BigDecimal(scrList.size()), 5, BigDecimal.ROUND_UP);
-        BigDecimal average = averageScFive.setScale(1, BigDecimal.ROUND_UP);
+        BigDecimal average = totalScore.divide(new BigDecimal(scrList.size()), 5, BigDecimal.ROUND_UP);
 
         // Standard Deviation
         double standardDeviation = 0.0;
         for(BigDecimal score: scrList) {
-            standardDeviation += Math.pow(score.subtract(averageScFive).doubleValue(), 2);
+            standardDeviation += Math.pow(score.subtract(average).doubleValue(), 2);
         }
         standardDeviation = Math.sqrt(standardDeviation / size);
-        standardDeviation = new BigDecimal(standardDeviation).setScale(1, BigDecimal.ROUND_UP).doubleValue();
 
         // max and min
         BigDecimal minScore = scrList.get(0);
@@ -380,11 +378,11 @@ public class pdfGen {
         table.addCell(titleCell);
 
         // add content
-        addCellsTo2ColumnsTable(table, "Median", median.toString());
-        addCellsTo2ColumnsTable(table, "Average", average.toString());
-        addCellsTo2ColumnsTable(table, "Standard Deviation", String.valueOf(standardDeviation));
-        addCellsTo2ColumnsTable(table, "Max", maxScore.toString());
-        addCellsTo2ColumnsTable(table, "Min", minScore.toString());
+        addCellsTo2ColumnsTable(table, "Median", decimalToString(median, 1));
+        addCellsTo2ColumnsTable(table, "Average", decimalToString(average, 1));
+        addCellsTo2ColumnsTable(table, "Standard Deviation", decimalToString(new BigDecimal(standardDeviation), 1));
+        addCellsTo2ColumnsTable(table, "Max", decimalToString(maxScore, 1));
+        addCellsTo2ColumnsTable(table, "Min", decimalToString(minScore, 1));
         addCellsTo2ColumnsTable(table, "\n", "");
         addCellsTo2ColumnsTable(table, "Count of grades:", String.valueOf(size));
         Set<String> gradeKeySet = gradeMap.keySet();
@@ -407,6 +405,20 @@ public class pdfGen {
         addLineBreak(document);
         paraLineBreaks(document,2);
         document.add(table);
+    }
+
+    /**
+     * Set bigDecimal to string by scale<br>
+     *
+     * @param [decimal, scale]
+     * @return java.lang.String
+     * @author Zihao Long
+     */
+    private static String decimalToString(BigDecimal decimal, int scale) {
+        if (decimal == null) {
+            decimal = BigDecimal.ZERO;
+        }
+        return decimal.setScale(scale, BigDecimal.ROUND_UP).toString();
     }
 
     /**

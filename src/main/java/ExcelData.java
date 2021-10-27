@@ -57,6 +57,9 @@ public class ExcelData {
         }
 
         Frame.logger.info("Parsing excel data successfully...");
+        if (rows < 2) {
+            throw new RuntimeException("The excel content is empty.");
+        }
         Frame.logger.info("Generating PDF file...");
 
         // the list for calculating student grade stats
