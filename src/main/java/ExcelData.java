@@ -55,6 +55,10 @@ public class ExcelData {
                 }
             }
         }
+
+        Frame.logger.info("Parsing excel data successfully...");
+        Frame.logger.info("Generating PDF file...");
+
         // the list for calculating student grade stats
         List<BigDecimal> scrList = new ArrayList<>();
         //get student arraylist and create pdf

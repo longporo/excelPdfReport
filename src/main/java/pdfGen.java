@@ -63,8 +63,8 @@ public class pdfGen {
     }
     public static PdfDocument generatePdf(String Path)throws IOException{
 
-
-        PdfWriter writer = new PdfWriter(Path+"Main.pdf");
+        Frame.PDF_FILE_PATH = Path + "Main.pdf";
+        PdfWriter writer = new PdfWriter(Frame.PDF_FILE_PATH);
         // Creating a PdfDocument
         PdfDocument pdfDoc = new PdfDocument(writer);
         pdfDoc.addNewPage();
@@ -285,7 +285,12 @@ public class pdfGen {
      */
     public static void addGradeStats(List<BigDecimal> scrList, PdfDocument mainPdf) throws IOException {
         // calculate stats
-        Collections.sort(scrList, BigDecimal::compareTo);
+        Collections.sort(scrList, new Comparator<BigDecimal>() {
+            @Override
+            public int compare(BigDecimal o1, BigDecimal o2) {
+                return o1.compareTo(o2);
+            }
+        });
 
         // Median
         BigDecimal median;
