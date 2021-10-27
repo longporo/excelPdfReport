@@ -56,17 +56,6 @@ public class Frame {
     private JPanel body;
 
     public static void main(String[] args) throws IOException {
-        // get system info
-        String osName = System.getProperty("os.name");
-        if (osName.startsWith("Windows")) {
-            IS_WINDOWS = true;
-            FILE_PATH_NOTATION = "\\";
-        } else {
-            // MacOs, linux
-            IS_MAC_OS = true;
-            FILE_PATH_NOTATION = "/";
-        }
-
         // init frame
         JFrame frame = new JFrame("Excel PDF Reports");
         frame.setSize(575, 400);
@@ -154,6 +143,19 @@ public class Frame {
      */
     private static void generatePdf(String excelFilePath, String pdfDirPath) {
         try {
+
+            // get system info
+            if ( FILE_PATH_NOTATION == null) {
+                String osName = System.getProperty("os.name");
+                if (osName.startsWith("Windows")) {
+                    IS_WINDOWS = true;
+                    FILE_PATH_NOTATION = "\\";
+                } else {
+                    // MacOs, linux
+                    IS_MAC_OS = true;
+                    FILE_PATH_NOTATION = "/";
+                }
+            }
 
             logger.info("Reading excel file...");
 
