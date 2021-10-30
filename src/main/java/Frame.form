@@ -30,7 +30,7 @@
             </constraints>
             <properties>
               <editable value="false"/>
-              <text value=" Select excel file..."/>
+              <text value=" Select a folder or excel file..."/>
             </properties>
           </component>
           <component id="297cf" class="javax.swing.JButton" binding="excel_btn">

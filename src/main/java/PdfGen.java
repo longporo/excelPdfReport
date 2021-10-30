@@ -23,7 +23,7 @@ import java.util.*;
 public class PdfGen {
 
 
-    public static void generatePdf(ArrayList<String> headerInfo, List<Student> stuList) throws IOException {
+    public static void generatePdf(List<Student> stuList) throws IOException {
         PdfWriter writer = new PdfWriter(Frame.PDF_FILE_PATH);
         // Creating a PdfDocument
         PdfDocument pdfDoc = new PdfDocument(writer);
@@ -53,12 +53,12 @@ public class PdfGen {
         for (Student stu : stuList) {
             // New page
             document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-            studentPdf(headerInfo, stu, pdfDoc, document);
+            studentPdf(stu, pdfDoc, document);
         }
         pdfDoc.close();
     }
 
-    public static void studentPdf(ArrayList<String> headerInfo, Student stu, PdfDocument pdfDoc, Document document) throws IOException{
+    public static void studentPdf(Student stu, PdfDocument pdfDoc, Document document) throws IOException{
         //spacing
         paraLineBreaks(document,1);
         //add heading
@@ -66,10 +66,10 @@ public class PdfGen {
         addLineBreak(document);
 
         paraLineBreaks(document,2);
-        addInfoTable(document, headerInfo, stu);
+        addInfoTable(document, stu);
 
         paraLineBreaks(document,2);
-        addGradeTable(document, headerInfo, stu);
+        addGradeTable(document, stu);
     }
 
     public static void addLineBreak(Document d) {
@@ -93,13 +93,13 @@ public class PdfGen {
             d.add(new Paragraph());
         }
     }
-    public static void addInfoTable(Document d, ArrayList<String> headerInfo, Student student){
+    public static void addInfoTable(Document d, Student student){
         //two cells (student number+ name)
         Table table = new Table(UnitValue.createPercentArray(new float[]{5,5}));
         infoTableStyling(table);
 
         Paragraph paraUpperSN = new Paragraph();
-        Text textUpperSN = new Text(headerInfo.get(5));
+        Text textUpperSN = new Text("Student Number");
         textUpperSN.setUnderline();
         paraUpperSN.add(textUpperSN);
 
@@ -111,7 +111,7 @@ public class PdfGen {
         table.addCell(new Cell().add(paraUpperSN.setTextAlignment(TextAlignment.LEFT)).add(paraStudentNumber));
 
         Paragraph paraUpperName = new Paragraph();
-        Text textUpperName = new Text(headerInfo.get(4));
+        Text textUpperName = new Text("Student Name");
         textUpperName.setUnderline();
         paraUpperName.add(textUpperName);
 
@@ -127,11 +127,11 @@ public class PdfGen {
         infoTableStyling(table2);
 
         Paragraph paraUpperRPT = new Paragraph();
-        Text textUpperRPT = new Text(headerInfo.get(2)+" "+headerInfo.get(6));
+        Text textUpperRPT = new Text("Project Number and Title");
         paraUpperRPT.add(textUpperRPT).setUnderline();
 
         Paragraph paraRoleProjectType = new Paragraph();
-        Text textRoleProjectType = new Text(student.getProjectNo() + " " + student.getProjectType());
+        Text textRoleProjectType = new Text(student.getProjectNo() + "-" + student.getTitle());
         infoTextStyling(textRoleProjectType);
         paraRoleProjectType.add(textRoleProjectType);
 
@@ -142,7 +142,7 @@ public class PdfGen {
         infoTableStyling(table3);
 
         Paragraph paraUpperGrader = new Paragraph();
-        Text textUpperGrader = new Text(headerInfo.get(0));
+        Text textUpperGrader = new Text("Supervisor");
         paraUpperGrader.add(textUpperGrader).setUnderline();
 
         Paragraph paraGrader = new Paragraph();
@@ -153,7 +153,7 @@ public class PdfGen {
         table3.addCell(new Cell().add(paraUpperGrader.setTextAlignment(TextAlignment.LEFT)).add(paraGrader));
 
         Paragraph paraUpperOther = new Paragraph();
-        Text textUpperOther = new Text(headerInfo.get(3));
+        Text textUpperOther = new Text("Second Reader");
         paraUpperOther.add(textUpperOther).setUnderline();
 
         Paragraph paraOtherGrader= new Paragraph();
@@ -168,7 +168,7 @@ public class PdfGen {
         infoTableStyling(table4);
 
         Paragraph paraUpperScore = new Paragraph();
-        Text textUpperScore = new Text(headerInfo.get(8));
+        Text textUpperScore = new Text("Grade Awarded");
         paraUpperScore.add(textUpperScore).setUnderline();
 
         Paragraph paraScore= new Paragraph();
@@ -183,7 +183,7 @@ public class PdfGen {
         d.add(table3);
         d.add(table4);
     }
-    public static void addGradeTable(Document d, ArrayList<String> headerInfo, Student student){
+    public static void addGradeTable(Document d, Student student){
         Color muOrange = new DeviceRgb(251,190,8);
         Color muGrey = new DeviceRgb(127,127,127);
         //2 cell titles (grader and other grader header)
@@ -195,8 +195,8 @@ public class PdfGen {
                 .setWidth(500)
                 .setUnderline();
 
-        table.addCell(new Cell().add(new Paragraph(headerInfo.get(0)+" ")));
-        table.addCell(new Cell().add(new Paragraph(headerInfo.get(3))));
+        table.addCell(new Cell().add(new Paragraph("Supervisor")));
+        table.addCell(new Cell().add(new Paragraph("Second Reader")));
 
         //4 cell modules (grades+results)
         Table table2 = new Table(UnitValue.createPercentArray(new float[]{3,5,3,5}));
@@ -223,7 +223,7 @@ public class PdfGen {
                 .setTextAlignment(TextAlignment.CENTER)
                 .setWidth(500);
 
-        table3.addCell(new Cell().add(new Paragraph(headerInfo.get(8)+" = "+ decimalToString(student.getGrade()))));
+        table3.addCell(new Cell().add(new Paragraph("Grade Average = "+ decimalToString(student.getGrade()))));
         //one cell (Title+ comments)
         Table table4 = new Table(UnitValue.createPercentArray(new float[]{10}));
         table4.setHorizontalAlignment(HorizontalAlignment.CENTER)
@@ -233,7 +233,7 @@ public class PdfGen {
                 .setWidth(500);
 
         Paragraph para1 = new Paragraph();
-        Text text1 = new Text(headerInfo.get(23));
+        Text text1 = new Text("Supervisor Comments:");
         text1.setFontColor(muOrange).setUnderline();
         para1.add(text1);
 
@@ -242,7 +242,7 @@ public class PdfGen {
         table4.addCell(new Cell().add(para1).add(comment.setTextAlignment(TextAlignment.CENTER)));
 
         Paragraph para3 = new Paragraph();
-        Text text3 = new Text(headerInfo.get(24));
+        Text text3 = new Text("Second Reader Comments:");
         text3.setFontColor(muOrange).setUnderline();
         para3.add(text3);
 
