@@ -2,49 +2,63 @@ import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.events.PdfDocumentEvent;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.geom.Rectangle;
 import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.*;
+import com.itextpdf.layout.property.AreaBreakType;
 import com.itextpdf.layout.property.HorizontalAlignment;
 import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
-public class pdfGen {
-    public static void studentPdf(ArrayList<String> headerInfo, ArrayList<String> studentInfo,String Path,PdfDocument pdfDoc) throws IOException{
+public class PdfGen {
+
+
+    public static void generatePdf(ArrayList<String> headerInfo, List<Student> stuList) throws IOException {
+        PdfWriter writer = new PdfWriter(Frame.PDF_FILE_PATH);
+        // Creating a PdfDocument
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        pdfDoc.addEventHandler(PdfDocumentEvent.START_PAGE, new PdfEventhandler());
 
         PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA);
-
-        //PdfWriter writer = new PdfWriter(Path+"students.pdf");
-        // Creating a PdfDocument
-        //PdfDocument pdfDoc = new PdfDocument(writer);
-
-        //Adding a new page
-        pdfDoc.addNewPage();
-        //Colours the page
-        PdfPage coloured = pdfDoc.getFirstPage();
-        PdfCanvas canvas = new PdfCanvas(coloured);
-        Rectangle rect = coloured.getPageSize();
-        canvas.saveState()
-                .setFillColor(ColorConstants.GRAY)
-                .rectangle(rect)
-                .fillStroke();
-
-        // Creating a Document
         Document document = new Document(pdfDoc);
-
         document.setFont(font);
+
+        // sort by grade desc
+        Collections.sort(stuList, new Comparator<Student>() {
+            @Override
+            public int compare(Student o1, Student o2) {
+                return o2.getGrade().compareTo(o1.getGrade());
+            }
+        });
+
+        // add student list
+        addStuListTable(stuList, pdfDoc, document);
+
+        // add grade stats
+        // New page
+        document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+        addGradeStats(stuList, pdfDoc, document);
+
+        // add student grade detail
+        for (Student stu : stuList) {
+            // New page
+            document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+            studentPdf(headerInfo, stu, pdfDoc, document);
+        }
+        pdfDoc.close();
+    }
+
+    public static void studentPdf(ArrayList<String> headerInfo, Student stu, PdfDocument pdfDoc, Document document) throws IOException{
         //spacing
         paraLineBreaks(document,1);
         //add heading
@@ -52,25 +66,12 @@ public class pdfGen {
         addLineBreak(document);
 
         paraLineBreaks(document,2);
-        addInfoTable(document,headerInfo,studentInfo);
+        addInfoTable(document, headerInfo, stu);
 
         paraLineBreaks(document,2);
-        addGradeTable(document,headerInfo,studentInfo);
-
-        for (int i = pdfDoc.getNumberOfPages(); i > 1; i--) {
-            pdfDoc.movePage(i, pdfDoc.getNumberOfPages()+1-i);
-        }
+        addGradeTable(document, headerInfo, stu);
     }
-    public static PdfDocument generatePdf(String Path)throws IOException{
 
-        Frame.PDF_FILE_PATH = Path + "Main.pdf";
-        PdfWriter writer = new PdfWriter(Frame.PDF_FILE_PATH);
-        // Creating a PdfDocument
-        PdfDocument pdfDoc = new PdfDocument(writer);
-        pdfDoc.addNewPage();
-
-        return pdfDoc;
-    }
     public static void addLineBreak(Document d) {
         SolidLine line = new SolidLine(1f);
         LineSeparator ls = new LineSeparator(line);
@@ -92,7 +93,7 @@ public class pdfGen {
             d.add(new Paragraph());
         }
     }
-    public static void addInfoTable(Document d,ArrayList<String> headerInfo, ArrayList<String> studentInfo){
+    public static void addInfoTable(Document d, ArrayList<String> headerInfo, Student student){
         //two cells (student number+ name)
         Table table = new Table(UnitValue.createPercentArray(new float[]{5,5}));
         infoTableStyling(table);
@@ -103,7 +104,7 @@ public class pdfGen {
         paraUpperSN.add(textUpperSN);
 
         Paragraph paraStudentNumber = new Paragraph();
-        Text textStudentNumber = new Text(studentInfo.get(5));
+        Text textStudentNumber = new Text(student.getStudentNo());
         infoTextStyling(textStudentNumber);
         paraStudentNumber.add(textStudentNumber);
 
@@ -115,7 +116,7 @@ public class pdfGen {
         paraUpperName.add(textUpperName);
 
         Paragraph paraName = new Paragraph();
-        Text textName = new Text(studentInfo.get(4));
+        Text textName = new Text(student.getStudentName());
         infoTextStyling(textName);
         paraName.add(textName);
 
@@ -130,7 +131,7 @@ public class pdfGen {
         paraUpperRPT.add(textUpperRPT).setUnderline();
 
         Paragraph paraRoleProjectType = new Paragraph();
-        Text textRoleProjectType = new Text(studentInfo.get(1)+" "+studentInfo.get(6));
+        Text textRoleProjectType = new Text(student.getProjectNo() + " " + student.getProjectType());
         infoTextStyling(textRoleProjectType);
         paraRoleProjectType.add(textRoleProjectType);
 
@@ -145,7 +146,7 @@ public class pdfGen {
         paraUpperGrader.add(textUpperGrader).setUnderline();
 
         Paragraph paraGrader = new Paragraph();
-        Text textGrader = new Text(studentInfo.get(0));
+        Text textGrader = new Text(student.getGrader());
         infoTextStyling(textGrader);
         paraGrader.add(textGrader);
 
@@ -156,7 +157,7 @@ public class pdfGen {
         paraUpperOther.add(textUpperOther).setUnderline();
 
         Paragraph paraOtherGrader= new Paragraph();
-        Text textOtherGrader = new Text(studentInfo.get(3));
+        Text textOtherGrader = new Text(student.getOtherGrader());
         infoTextStyling(textOtherGrader);
         paraOtherGrader.add(textOtherGrader);
 
@@ -171,7 +172,7 @@ public class pdfGen {
         paraUpperScore.add(textUpperScore).setUnderline();
 
         Paragraph paraScore= new Paragraph();
-        Text textScore = new Text(studentInfo.get(8));
+        Text textScore = new Text(decimalToString(student.getGrade()));
         textScore.setFontColor(ColorConstants.BLACK).setBold().setCharacterSpacing(1);
         paraScore.add(textScore);
 
@@ -182,7 +183,7 @@ public class pdfGen {
         d.add(table3);
         d.add(table4);
     }
-    public static void addGradeTable(Document d,ArrayList<String> headerInfo, ArrayList<String> studentInfo){
+    public static void addGradeTable(Document d, ArrayList<String> headerInfo, Student student){
         Color muOrange = new DeviceRgb(251,190,8);
         Color muGrey = new DeviceRgb(127,127,127);
         //2 cell titles (grader and other grader header)
@@ -206,13 +207,13 @@ public class pdfGen {
                 .setWidth(500)
                 .setFontSize(10);
 
-        for(int i = 9; i < 22; i+=2) {
-            //modules
-            table2.addCell(new Cell().add(new Paragraph(headerInfo.get(i))));
-            table2.addCell(new Cell().add(new Paragraph(studentInfo.get(i) + "/" + studentInfo.get(i+1)).setFontColor(ColorConstants.WHITE).setTextAlignment(TextAlignment.CENTER)));
-            table2.addCell(new Cell().add(new Paragraph(headerInfo.get(i))));
-            table2.addCell(new Cell().add(new Paragraph(studentInfo.get(i) + "/" + studentInfo.get(i+1)).setFontColor(ColorConstants.WHITE).setTextAlignment(TextAlignment.CENTER)));
-        }
+        addValToGradeTable(table2, "Abstract", student.getAbstractScr(), student.getAbstractScrX());
+        addValToGradeTable(table2, "Motivation", student.getMotivation(), student.getMotivationX());
+        addValToGradeTable(table2, "Background", student.getBackground(), student.getBackgroundX());
+        addValToGradeTable(table2, "Problem", student.getProblem(), student.getProblemX());
+        addValToGradeTable(table2, "Solution", student.getSolution(), student.getSolutionX());
+        addValToGradeTable(table2, "Conclusion or Testing and Evaluation", student.getCte(), student.getCteX());
+        addValToGradeTable(table2, "Presentation", student.getPresentation(), student.getPresentationX());
 
         //one cell (Score)
         Table table3 = new Table(UnitValue.createPercentArray(new float[]{10}));
@@ -222,7 +223,7 @@ public class pdfGen {
                 .setTextAlignment(TextAlignment.CENTER)
                 .setWidth(500);
 
-        table3.addCell(new Cell().add(new Paragraph(headerInfo.get(8)+" = "+studentInfo.get(8))));
+        table3.addCell(new Cell().add(new Paragraph(headerInfo.get(8)+" = "+ decimalToString(student.getGrade()))));
         //one cell (Title+ comments)
         Table table4 = new Table(UnitValue.createPercentArray(new float[]{10}));
         table4.setHorizontalAlignment(HorizontalAlignment.CENTER)
@@ -236,22 +237,18 @@ public class pdfGen {
         text1.setFontColor(muOrange).setUnderline();
         para1.add(text1);
 
-        Paragraph para2 = new Paragraph();
-        Text text2 = new Text(studentInfo.get(23));
-        para2.add(text2);
+        Paragraph comment = new Paragraph(student.getComment());
 
-        table4.addCell(new Cell().add(para1).add(para2.setTextAlignment(TextAlignment.CENTER)));
+        table4.addCell(new Cell().add(para1).add(comment.setTextAlignment(TextAlignment.CENTER)));
 
         Paragraph para3 = new Paragraph();
         Text text3 = new Text(headerInfo.get(24));
         text3.setFontColor(muOrange).setUnderline();
         para3.add(text3);
 
-        Paragraph para4 = new Paragraph();
-        Text text4 = new Text(studentInfo.get(24));
-        para4.add(text4);
+        Paragraph title = new Paragraph(student.getTitle());
 
-        table4.addCell(new Cell().add(para3).add(para4.setTextAlignment(TextAlignment.CENTER)));
+        table4.addCell(new Cell().add(para3).add(title.setTextAlignment(TextAlignment.CENTER)));
 
         d.add(table);
         d.add(table2);
@@ -259,6 +256,21 @@ public class pdfGen {
         d.add(table4);
 
     }
+
+    /**
+     * Add value to grade table<br>
+     *
+     * @param [table, key, val, valX]
+     * @return void
+     * @author Zihao Long
+     */
+    private static void addValToGradeTable(Table table, String key, BigDecimal val, BigDecimal valX) {
+        table.addCell(new Cell().add(new Paragraph(key)));
+        table.addCell(new Cell().add(new Paragraph(decimalToString(val) + "/" + decimalToString(valX)).setFontColor(ColorConstants.WHITE).setTextAlignment(TextAlignment.CENTER)));
+        table.addCell(new Cell().add(new Paragraph(key)));
+        table.addCell(new Cell().add(new Paragraph(decimalToString(val) + "/" + decimalToString(valX)).setFontColor(ColorConstants.WHITE).setTextAlignment(TextAlignment.CENTER)));
+    }
+
     public static void infoTableStyling(Table t){
         Color muOrange = new DeviceRgb(251,190,8);
         Color muText = new DeviceRgb(157,128,60);
@@ -279,45 +291,40 @@ public class pdfGen {
     /**
      * Add grade stats to the first page<br>
      *
-     * @param [scrList, mainPdf]
+     * @param [stuList, mainPdf]
+     * @param stuList
+     * @param document
      * @return void
      * @author Zihao Long
      */
-    public static void addGradeStats(List<BigDecimal> scrList, PdfDocument mainPdf) throws IOException {
+    public static void addGradeStats(List<Student> stuList, PdfDocument mainPdf, Document document) throws IOException {
         // calculate stats
-        Collections.sort(scrList, new Comparator<BigDecimal>() {
-            @Override
-            public int compare(BigDecimal o1, BigDecimal o2) {
-                return o1.compareTo(o2);
-            }
-        });
-
         // Median
         BigDecimal median;
-        int size = scrList.size();
+        int size = stuList.size();
         if(size % 2 == 1){
-            median = scrList.get((size - 1) / 2);
+            median = stuList.get((size - 1) / 2).getGrade();
         } else {
-            median = scrList.get(size / 2 - 1).add(scrList.get(size / 2)).divide(new BigDecimal(2));
+            median = stuList.get(size / 2 - 1).getGrade().add(stuList.get(size / 2).getGrade()).divide(new BigDecimal(2));
         }
 
         // Average
         BigDecimal totalScore = BigDecimal.ZERO;
-        for (BigDecimal score : scrList) {
-            totalScore = totalScore.add(score);
+        for (Student stu : stuList) {
+            totalScore = totalScore.add(stu.getGrade());
         }
-        BigDecimal average = totalScore.divide(new BigDecimal(scrList.size()), 5, BigDecimal.ROUND_UP);
+        BigDecimal average = totalScore.divide(new BigDecimal(stuList.size()), 5, BigDecimal.ROUND_UP);
 
         // Standard Deviation
         double standardDeviation = 0.0;
-        for(BigDecimal score: scrList) {
-            standardDeviation += Math.pow(score.subtract(average).doubleValue(), 2);
+        for(Student stu: stuList) {
+            standardDeviation += Math.pow(stu.getGrade().subtract(average).doubleValue(), 2);
         }
         standardDeviation = Math.sqrt(standardDeviation / size);
 
         // max and min
-        BigDecimal minScore = scrList.get(0);
-        BigDecimal maxScore = scrList.get(size - 1);
+        BigDecimal minScore = stuList.get(size - 1).getGrade();
+        BigDecimal maxScore = stuList.get(0).getGrade();
 
         // count of grades
         Map<String, Integer> gradeMap = new LinkedHashMap<>();
@@ -332,8 +339,8 @@ public class pdfGen {
         gradeMap.put(">=10-19", 0);
         gradeMap.put("<10", 0);
 
-        for (BigDecimal scr : scrList) {
-            int score = scr.intValue();
+        for (Student stu : stuList) {
+            int score = stu.getGrade().intValue();
             String key = null;
             if (score < 10) {
                 key = "<10";
@@ -358,7 +365,6 @@ public class pdfGen {
         }
 
         // add values to table
-        Document document = new Document(mainPdf);
         Color muOrange = new DeviceRgb(251,190,8);
         Color muGrey = new DeviceRgb(127,127,127);
         // 2 columns table
@@ -368,9 +374,9 @@ public class pdfGen {
                 .setFontColor(muOrange)
                 .setTextAlignment(TextAlignment.CENTER)
                 .setWidth(500)
-                .setPageNumber(1);
+                .setPageNumber(2);
 
-        // add title
+        // add table header
         Cell titleCell = new Cell(1, 10).add(new Paragraph("Grade Stats"));
         titleCell.setPaddingTop(10f);
         titleCell.setPaddingBottom(10f);
@@ -378,11 +384,11 @@ public class pdfGen {
         table.addCell(titleCell);
 
         // add content
-        addCellsTo2ColumnsTable(table, "Median", decimalToString(median, 1));
-        addCellsTo2ColumnsTable(table, "Average", decimalToString(average, 1));
-        addCellsTo2ColumnsTable(table, "Standard Deviation", decimalToString(new BigDecimal(standardDeviation), 1));
-        addCellsTo2ColumnsTable(table, "Max", decimalToString(maxScore, 1));
-        addCellsTo2ColumnsTable(table, "Min", decimalToString(minScore, 1));
+        addCellsTo2ColumnsTable(table, "Median", decimalToString(median));
+        addCellsTo2ColumnsTable(table, "Average", decimalToString(average));
+        addCellsTo2ColumnsTable(table, "Standard Deviation", decimalToString(new BigDecimal(standardDeviation)));
+        addCellsTo2ColumnsTable(table, "Max", decimalToString(maxScore));
+        addCellsTo2ColumnsTable(table, "Min", decimalToString(minScore));
         addCellsTo2ColumnsTable(table, "\n", "");
         addCellsTo2ColumnsTable(table, "Count of grades:", String.valueOf(size));
         Set<String> gradeKeySet = gradeMap.keySet();
@@ -390,14 +396,6 @@ public class pdfGen {
             addCellsTo2ColumnsTable(table, key, gradeMap.get(key).toString());
         }
 
-        //Colours the page
-        PdfPage coloured = mainPdf.getFirstPage();
-        PdfCanvas canvas = new PdfCanvas(coloured);
-        Rectangle rect = coloured.getPageSize();
-        canvas.saveState()
-                .setFillColor(ColorConstants.GRAY)
-                .rectangle(rect)
-                .fillStroke();
         //spacing
         paraLineBreaks(document,1);
         //add heading
@@ -414,9 +412,13 @@ public class pdfGen {
      * @return java.lang.String
      * @author Zihao Long
      */
-    private static String decimalToString(BigDecimal decimal, int scale) {
+    public static String decimalToString(BigDecimal decimal, int...scaleArr) {
         if (decimal == null) {
-            decimal = BigDecimal.ZERO;
+            return " - ";
+        }
+        int scale = 1;
+        if (scaleArr.length != 0) {
+            scale = scaleArr[0];
         }
         return decimal.setScale(scale, BigDecimal.ROUND_UP).toString();
     }
@@ -436,4 +438,73 @@ public class pdfGen {
         valuePg.setFontColor(ColorConstants.WHITE);
         table.addCell(new Cell().add(valuePg));
     }
+
+    /**
+     * Add student list table<br>
+     *
+     * @param [stuList, mainPdf]
+     * @param document
+     * @return void
+     * @author Zihao Long
+     */
+    public static void addStuListTable(List<Student> stuList, PdfDocument mainPdf, Document document) throws IOException {
+        // add values to table
+        Color muOrange = new DeviceRgb(251,190,8);
+        Color muGrey = new DeviceRgb(127,127,127);
+        // 2 columns table
+        Table table = new Table(UnitValue.createPercentArray(new float[]{2.5f, 2.5f, 2.5f, 2.5f}));
+        table.setHorizontalAlignment(HorizontalAlignment.CENTER)
+                .setBackgroundColor(muGrey)
+                .setFontColor(muOrange)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setWidth(500);
+
+        // add table header
+        addStuListTableHeader(table, "Project No.");
+        addStuListTableHeader(table, "Student Name");
+        addStuListTableHeader(table, "Student No.");
+        addStuListTableHeader(table, "Grade");
+
+        // add student list
+        for (Student student : stuList) {
+            addStuListTableBody(table, student.getProjectNo());
+            addStuListTableBody(table, student.getStudentName());
+            addStuListTableBody(table, student.getStudentNo());
+            addStuListTableBody(table, decimalToString(student.getGrade()));
+        }
+
+        //spacing
+        paraLineBreaks(document,1);
+        //add heading
+        addPara(document);
+        addLineBreak(document);
+        paraLineBreaks(document,2);
+        document.add(table);
+    }
+
+    /**
+     * Add student list table header<br>
+     *
+     * @param [table, headerStr]
+     * @return void
+     * @author Zihao Long
+     */
+    private static void addStuListTableHeader(Table table, String headerStr) {
+        Cell header = new Cell().add(new Paragraph(headerStr));
+        header.setFontSize(15f);
+        table.addCell(header);
+    }
+
+    /**
+     * Add student list table body<br>
+     *
+     * @param [table, bodyStr]
+     * @return void
+     * @author Zihao Long
+     */
+    private static void addStuListTableBody(Table table, String bodyStr) {
+        Cell header = new Cell().add(new Paragraph(bodyStr).setFontColor(ColorConstants.WHITE));
+        table.addCell(header);
+    }
+
 }
