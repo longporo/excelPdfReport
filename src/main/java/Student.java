@@ -1,26 +1,29 @@
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 public class Student {
 
-    private String grader;
+    private String grader = "";
 
-    private String projectNo;
+    private String projectNo = "";
 
-    private String role;
+    private String role = "";
 
-    private String otherGrader;
+    private String otherGrader = "";
 
-    private String studentName;
+    private String studentName = "";
 
-    private String studentNo;
+    private String studentNo = "";
 
-    private String projectType;
+    private String projectType = "";
 
     private BigDecimal credit;
 
     private BigDecimal grade;
+
+    private BigDecimal avgGrade;
 
     private BigDecimal abstractScr;
     private BigDecimal abstractScrX;
@@ -43,9 +46,27 @@ public class Student {
     private BigDecimal presentation;
     private BigDecimal presentationX;
 
-    private String comment;
+    private String comment = "";
 
-    private String title;
+    private String title = "";
+
+    public BigDecimal getAvgGrade() {
+        return avgGrade;
+    }
+
+    public void setAvgGrade(BigDecimal avgGrade) {
+        this.avgGrade = avgGrade;
+    }
+
+    private Map<String, Student> graderMap;
+
+    public Map<String, Student> getGraderMap() {
+        return graderMap;
+    }
+
+    public void setGraderMap(Map<String, Student> graderMap) {
+        this.graderMap = graderMap;
+    }
 
     public String getGrader() {
         return grader;

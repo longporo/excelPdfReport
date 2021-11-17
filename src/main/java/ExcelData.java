@@ -4,12 +4,13 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ExcelData {
 
@@ -37,7 +38,7 @@ public class ExcelData {
             throw new RuntimeException("No data found in the excel file.");
         }
 
-        Frame.logger.info("Parsing excel data successfully, " + stuList.size() + " pieces of data have been read...");
+        Frame.logger.info("Parsing excel data successfully...");
         Frame.logger.info("Generating PDF file...");
 
         // generate content to pdf
@@ -52,7 +53,7 @@ public class ExcelData {
      * @author Zihao Long
      */
     private static List<Student> getImportData(File[] files) throws Exception {
-        List<Student> stuList = new ArrayList<>();
+        Map<String, Map<String, Student>> stuMap = new HashMap<>(16);
         for (File file : files) {
             XSSFWorkbook workbook = null;
             try {
@@ -77,13 +78,40 @@ public class ExcelData {
                         String key = KEY_ARRAY[j];
                         setValToStu(key, handleCellType(row.getCell(j)), student);
                     }
-                    stuList.add(student);
+
+                    String studentNo = student.getStudentNo();
+                    Map<String, Student> stuSubMap = stuMap.get(studentNo);
+                    if (stuSubMap == null) {
+                        stuSubMap = new HashMap<>(2);
+                        stuMap.put(studentNo, stuSubMap);
+                    }
+                    stuSubMap.put(student.getRole(), student);
                 }
             } finally {
                 if (workbook != null) {
                     workbook.close();
                 }
             }
+        }
+
+        // gen student list
+        List<Student> stuList = new ArrayList<>();
+        Set<String> keySet = stuMap.keySet();
+        for (String key : keySet) {
+            Map<String, Student> graderMap = stuMap.get(key);
+            Set<String> graderSet = graderMap.keySet();
+            BigDecimal totalGrade = BigDecimal.ZERO;
+            int count = 0;
+            Student tmpStu = null;
+            for (String graderKey : graderSet) {
+                tmpStu = graderMap.get(graderKey);
+                totalGrade = totalGrade.add(tmpStu.getGrade());
+                count++;
+            }
+            BigDecimal avgGrade = totalGrade.divide(new BigDecimal(count)).setScale(1, BigDecimal.ROUND_UP);
+            tmpStu.setAvgGrade(avgGrade);
+            tmpStu.setGraderMap(graderMap);
+            stuList.add(tmpStu);
         }
         return stuList;
     }

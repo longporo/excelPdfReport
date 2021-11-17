@@ -235,6 +235,9 @@ public class Frame {
         if (fileName.endsWith("csv")
                 || fileName.endsWith("xls")
                 || fileName.endsWith("xlsx")) {
+            if (fileName.startsWith(".")) {
+                return false;
+            }
             return true;
         }
         return false;

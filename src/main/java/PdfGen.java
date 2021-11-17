@@ -10,10 +10,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.*;
-import com.itextpdf.layout.property.AreaBreakType;
-import com.itextpdf.layout.property.HorizontalAlignment;
-import com.itextpdf.layout.property.TextAlignment;
-import com.itextpdf.layout.property.UnitValue;
+import com.itextpdf.layout.property.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -37,7 +34,7 @@ public class PdfGen {
         Collections.sort(stuList, new Comparator<Student>() {
             @Override
             public int compare(Student o1, Student o2) {
-                return o2.getGrade().compareTo(o1.getGrade());
+                return o2.getAvgGrade().compareTo(o1.getAvgGrade());
             }
         });
 
@@ -141,23 +138,27 @@ public class PdfGen {
         Table table3 = new Table(UnitValue.createPercentArray(new float[]{5,5}));
         infoTableStyling(table3);
 
+        // supervisor
+        Student supervisor = getSupervisor(student);
         Paragraph paraUpperGrader = new Paragraph();
         Text textUpperGrader = new Text("Supervisor");
         paraUpperGrader.add(textUpperGrader).setUnderline();
 
         Paragraph paraGrader = new Paragraph();
-        Text textGrader = new Text(student.getGrader());
+        Text textGrader = new Text(supervisor.getGrader());
         infoTextStyling(textGrader);
         paraGrader.add(textGrader);
 
         table3.addCell(new Cell().add(paraUpperGrader.setTextAlignment(TextAlignment.LEFT)).add(paraGrader));
 
+        // secondReader
+        Student secondReader = getSecondReader(student);
         Paragraph paraUpperOther = new Paragraph();
         Text textUpperOther = new Text("Second Reader");
         paraUpperOther.add(textUpperOther).setUnderline();
 
         Paragraph paraOtherGrader= new Paragraph();
-        Text textOtherGrader = new Text(student.getOtherGrader());
+        Text textOtherGrader = new Text(secondReader.getGrader());
         infoTextStyling(textOtherGrader);
         paraOtherGrader.add(textOtherGrader);
 
@@ -172,7 +173,7 @@ public class PdfGen {
         paraUpperScore.add(textUpperScore).setUnderline();
 
         Paragraph paraScore= new Paragraph();
-        Text textScore = new Text(decimalToString(student.getGrade()));
+        Text textScore = new Text(decimalToString(student.getAvgGrade()));
         textScore.setFontColor(ColorConstants.BLACK).setBold().setCharacterSpacing(1);
         paraScore.add(textScore);
 
@@ -183,6 +184,39 @@ public class PdfGen {
         d.add(table3);
         d.add(table4);
     }
+
+    /**
+     * Get supervisor from grader map<br>
+     *
+     * @param [student]
+     * @return Student
+     * @author Zihao Long
+     */
+    private static Student getSupervisor(Student student) {
+        Map<String, Student> graderMap = student.getGraderMap();
+        Student supervisor = graderMap.get("Supervisor");
+        if (supervisor == null) {
+            supervisor = new Student();
+        }
+        return supervisor;
+    }
+
+    /**
+     * Get second reader from grader map<br><br>
+     *
+     * @param [student]
+     * @return Student
+     * @author Zihao Long
+     */
+    private static Student getSecondReader(Student student) {
+        Map<String, Student> graderMap = student.getGraderMap();
+        Student secondReader = graderMap.get("2nd Reader");
+        if (secondReader == null) {
+            secondReader = new Student();
+        }
+        return secondReader;
+    }
+
     public static void addGradeTable(Document d, Student student){
         Color muOrange = new DeviceRgb(251,190,8);
         Color muGrey = new DeviceRgb(127,127,127);
@@ -207,13 +241,15 @@ public class PdfGen {
                 .setWidth(500)
                 .setFontSize(10);
 
-        addValToGradeTable(table2, "Abstract", student.getAbstractScr(), student.getAbstractScrX());
-        addValToGradeTable(table2, "Motivation", student.getMotivation(), student.getMotivationX());
-        addValToGradeTable(table2, "Background", student.getBackground(), student.getBackgroundX());
-        addValToGradeTable(table2, "Problem", student.getProblem(), student.getProblemX());
-        addValToGradeTable(table2, "Solution", student.getSolution(), student.getSolutionX());
-        addValToGradeTable(table2, "Conclusion or Testing and Evaluation", student.getCte(), student.getCteX());
-        addValToGradeTable(table2, "Presentation", student.getPresentation(), student.getPresentationX());
+        Student supervisor = getSupervisor(student);
+        Student secondReader = getSecondReader(student);
+        addValToGradeTable(table2, "Abstract", supervisor.getAbstractScr(), supervisor.getAbstractScrX(), secondReader.getAbstractScr(), secondReader.getAbstractScrX());
+        addValToGradeTable(table2, "Motivation", supervisor.getMotivation(), supervisor.getMotivationX(), secondReader.getMotivation(), secondReader.getMotivationX());
+        addValToGradeTable(table2, "Background", supervisor.getBackground(), supervisor.getBackgroundX(), secondReader.getBackground(), secondReader.getBackgroundX());
+        addValToGradeTable(table2, "Problem", supervisor.getProblem(), supervisor.getProblemX(), secondReader.getProblem(), secondReader.getProblemX());
+        addValToGradeTable(table2, "Solution", supervisor.getSolution(), supervisor.getSolutionX(), secondReader.getSolution(), secondReader.getSolutionX());
+        addValToGradeTable(table2, "Conclusion or Testing and Evaluation", supervisor.getCte(), supervisor.getCteX(), secondReader.getCte(), secondReader.getCteX());
+        addValToGradeTable(table2, "Presentation", supervisor.getPresentation(), supervisor.getPresentationX(), secondReader.getPresentation(), secondReader.getPresentationX());
 
         //one cell (Score)
         Table table3 = new Table(UnitValue.createPercentArray(new float[]{10}));
@@ -223,7 +259,7 @@ public class PdfGen {
                 .setTextAlignment(TextAlignment.CENTER)
                 .setWidth(500);
 
-        table3.addCell(new Cell().add(new Paragraph("Grade Average = "+ decimalToString(student.getGrade()))));
+        table3.addCell(new Cell().add(new Paragraph("Grade Average = "+ decimalToString(student.getAvgGrade()))));
         //one cell (Title+ comments)
         Table table4 = new Table(UnitValue.createPercentArray(new float[]{10}));
         table4.setHorizontalAlignment(HorizontalAlignment.CENTER)
@@ -237,18 +273,18 @@ public class PdfGen {
         text1.setFontColor(muOrange).setUnderline();
         para1.add(text1);
 
-        Paragraph comment = new Paragraph(student.getComment());
+        Paragraph supComments = new Paragraph(supervisor.getComment());
 
-        table4.addCell(new Cell().add(para1).add(comment.setTextAlignment(TextAlignment.CENTER)));
+        table4.addCell(new Cell().add(para1).add(supComments.setTextAlignment(TextAlignment.CENTER)));
 
         Paragraph para3 = new Paragraph();
         Text text3 = new Text("Second Reader Comments:");
         text3.setFontColor(muOrange).setUnderline();
         para3.add(text3);
 
-        Paragraph title = new Paragraph(student.getTitle());
+        Paragraph sndComments = new Paragraph(secondReader.getComment());
 
-        table4.addCell(new Cell().add(para3).add(title.setTextAlignment(TextAlignment.CENTER)));
+        table4.addCell(new Cell().add(para3).add(sndComments.setTextAlignment(TextAlignment.CENTER)));
 
         d.add(table);
         d.add(table2);
@@ -264,11 +300,11 @@ public class PdfGen {
      * @return void
      * @author Zihao Long
      */
-    private static void addValToGradeTable(Table table, String key, BigDecimal val, BigDecimal valX) {
+    private static void addValToGradeTable(Table table, String key, BigDecimal supVal, BigDecimal supValX, BigDecimal sndVal, BigDecimal sndValX) {
         table.addCell(new Cell().add(new Paragraph(key)));
-        table.addCell(new Cell().add(new Paragraph(decimalToString(val) + "/" + decimalToString(valX)).setFontColor(ColorConstants.WHITE).setTextAlignment(TextAlignment.CENTER)));
+        table.addCell(new Cell().add(new Paragraph(decimalToString(supVal) + "/" + decimalToString(supValX)).setFontColor(ColorConstants.WHITE).setTextAlignment(TextAlignment.CENTER)));
         table.addCell(new Cell().add(new Paragraph(key)));
-        table.addCell(new Cell().add(new Paragraph(decimalToString(val) + "/" + decimalToString(valX)).setFontColor(ColorConstants.WHITE).setTextAlignment(TextAlignment.CENTER)));
+        table.addCell(new Cell().add(new Paragraph(decimalToString(sndVal) + "/" + decimalToString(sndValX)).setFontColor(ColorConstants.WHITE).setTextAlignment(TextAlignment.CENTER)));
     }
 
     public static void infoTableStyling(Table t){
@@ -303,28 +339,28 @@ public class PdfGen {
         BigDecimal median;
         int size = stuList.size();
         if(size % 2 == 1){
-            median = stuList.get((size - 1) / 2).getGrade();
+            median = stuList.get((size - 1) / 2).getAvgGrade();
         } else {
-            median = stuList.get(size / 2 - 1).getGrade().add(stuList.get(size / 2).getGrade()).divide(new BigDecimal(2));
+            median = stuList.get(size / 2 - 1).getAvgGrade().add(stuList.get(size / 2).getAvgGrade()).divide(new BigDecimal(2));
         }
 
         // Average
         BigDecimal totalScore = BigDecimal.ZERO;
         for (Student stu : stuList) {
-            totalScore = totalScore.add(stu.getGrade());
+            totalScore = totalScore.add(stu.getAvgGrade());
         }
         BigDecimal average = totalScore.divide(new BigDecimal(stuList.size()), 5, BigDecimal.ROUND_UP);
 
         // Standard Deviation
         double standardDeviation = 0.0;
         for(Student stu: stuList) {
-            standardDeviation += Math.pow(stu.getGrade().subtract(average).doubleValue(), 2);
+            standardDeviation += Math.pow(stu.getAvgGrade().subtract(average).doubleValue(), 2);
         }
         standardDeviation = Math.sqrt(standardDeviation / size);
 
         // max and min
-        BigDecimal minScore = stuList.get(size - 1).getGrade();
-        BigDecimal maxScore = stuList.get(0).getGrade();
+        BigDecimal minScore = stuList.get(size - 1).getAvgGrade();
+        BigDecimal maxScore = stuList.get(0).getAvgGrade();
 
         // count of grades
         Map<String, Integer> gradeMap = new LinkedHashMap<>();
@@ -340,7 +376,7 @@ public class PdfGen {
         gradeMap.put("<10", 0);
 
         for (Student stu : stuList) {
-            int score = stu.getGrade().intValue();
+            int score = stu.getAvgGrade().intValue();
             String key = null;
             if (score < 10) {
                 key = "<10";
@@ -470,7 +506,7 @@ public class PdfGen {
             addStuListTableBody(table, student.getProjectNo());
             addStuListTableBody(table, student.getStudentName());
             addStuListTableBody(table, student.getStudentNo());
-            addStuListTableBody(table, decimalToString(student.getGrade()));
+            addStuListTableBody(table, decimalToString(student.getAvgGrade()));
         }
 
         //spacing
