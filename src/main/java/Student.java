@@ -50,6 +50,75 @@ public class Student {
 
     private String title = "";
 
+    private Map<String, Student> graderMap;
+
+    private float[] graderTableColumn;
+
+    private float[] gradeTableColumn;
+
+    /**
+     * init grade info table column<br>
+     *
+     * @param []
+     * @return float[]
+     * @author Zihao Long
+     */
+    public float[] getGradeTableColumn() {
+        Map<String, Student> graderMap = this.graderMap;
+        int graderCounts = graderMap.keySet().size();
+        float[] tableColumn;
+        switch (graderCounts) {
+            case 2:
+                // two graders
+                tableColumn = new float[]{3, 5, 3, 5};
+                break;
+            case 3:
+                // three graders
+                tableColumn = new float[]{3, 5, 3, 5, 3, 5};
+                break;
+            default:
+                // one grader
+                tableColumn = new float[]{3, 5};
+        }
+        return tableColumn;
+    }
+
+    public void setGradeTableColumn(float[] gradeTableColumn) {
+        this.gradeTableColumn = gradeTableColumn;
+    }
+
+    /**
+     * init grader info table column<br>
+     *
+     * @param []
+     * @return float[]
+     * @author Zihao Long
+     */
+    public float[] getGraderTableColumn() {
+        Map<String, Student> graderMap = this.graderMap;
+        int graderCounts = graderMap.keySet().size();
+        float[] tableColumn;
+        switch (graderCounts) {
+            case 2:
+                // two graders
+                tableColumn = new float[]{5, 5};
+                break;
+            case 3:
+                // three graders
+                tableColumn = new float[]{8, 8, 8};
+                break;
+            default:
+                // one grader
+                tableColumn = new float[]{10};
+        }
+        return tableColumn;
+    }
+
+    public void setGraderTableColumn(float[] graderTableColumn) {
+        this.graderTableColumn = graderTableColumn;
+    }
+
+
     public BigDecimal getAvgGrade() {
         return avgGrade;
     }
@@ -58,7 +127,6 @@ public class Student {
         this.avgGrade = avgGrade;
     }
 
-    private Map<String, Student> graderMap;
 
     public Map<String, Student> getGraderMap() {
         return graderMap;

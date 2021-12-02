@@ -37,6 +37,11 @@ public class Frame {
     public static String PDF_FILE_PATH;
 
     /**
+     * The file path split string, used when select multiple files
+     */
+    public static final String FILE_PATH_SPLIT_STR = "#.#";
+
+    /**
      * The logger
      */
     public static Logger logger = Logger.getLogger(Frame.class);
@@ -88,11 +93,19 @@ public class Frame {
         excel_btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                File file = showExcelFileDialog();
-                if (file == null) {
+                File[] fileArr = showExcelFileDialog();
+                if (fileArr == null || fileArr.length == 0) {
                     return;
                 }
-                excel_input.setText(file.getAbsolutePath());
+                String filePath = "";
+                for (int i = 0; i < fileArr.length; i++) {
+                    File file = fileArr[i];
+                    filePath += file.getAbsolutePath();
+                    if (i != fileArr.length - 1) {
+                        filePath += Frame.FILE_PATH_SPLIT_STR;
+                    }
+                }
+                excel_input.setText(filePath);
             }
         });
 
@@ -170,7 +183,7 @@ public class Frame {
             }
             openFile(PDF_FILE_PATH);
         } catch (Exception e) {
-//            e.printStackTrace();
+            e.printStackTrace();
             logger.error(e.getMessage());
         }
     }
@@ -197,7 +210,7 @@ public class Frame {
      * @return java.io.File
      * @author Zihao Long
      */
-    public File showExcelFileDialog() {
+    public File[] showExcelFileDialog() {
         JFileChooser fileChooser = new JFileChooser();
         // set excel file filter
         fileChooser.setAcceptAllFileFilterUsed(false);
@@ -212,15 +225,15 @@ public class Frame {
 
             @Override
             public String getDescription() {
-                return "directory or excel file (*.csv, *.xls, *.xlsx)";
+                return "folder or excel file (*.csv, *.xls, *.xlsx)";
             }
         });
 
         fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setMultiSelectionEnabled(true);
         fileChooser.showDialog(new JLabel(), "select");
-        File file = fileChooser.getSelectedFile();
-        return file;
+        File[] selectedFiles = fileChooser.getSelectedFiles();
+        return selectedFiles;
     }
 
     /**

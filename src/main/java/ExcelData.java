@@ -22,18 +22,24 @@ public class ExcelData {
 
         Frame.PDF_FILE_PATH = pdfPath + "Main.pdf";
 
-        File inputFile = new File(excelPath);
-        File[] files = new File[]{inputFile};
-        if (inputFile.isDirectory()) {
-            files = inputFile.listFiles(new FileFilter() {
-                @Override
-                public boolean accept(File file) {
-                    return Frame.filterExcelFile(file);
-                }
-            });
+        List<File> fileList = new ArrayList<>();
+        String[] filePathArr = excelPath.split(Frame.FILE_PATH_SPLIT_STR);
+        for (String filePath : filePathArr) {
+            File inputFile = new File(filePath);
+            File[] files = new File[]{inputFile};
+            if (inputFile.isDirectory()) {
+                files = inputFile.listFiles(new FileFilter() {
+                    @Override
+                    public boolean accept(File file) {
+                        return Frame.filterExcelFile(file);
+                    }
+                });
+            }
+            fileList.addAll(Arrays.asList(files));
         }
 
-        List<Student> stuList = getImportData(files);
+
+        List<Student> stuList = getImportData(fileList);
         if (stuList.size() == 0) {
             throw new RuntimeException("No data found in the excel file.");
         }
@@ -52,9 +58,9 @@ public class ExcelData {
      * @return java.util.List<Student>
      * @author Zihao Long
      */
-    private static List<Student> getImportData(File[] files) throws Exception {
+    private static List<Student> getImportData(List<File> fileList) throws Exception {
         Map<String, Map<String, Student>> stuMap = new HashMap<>(16);
-        for (File file : files) {
+        for (File file : fileList) {
             XSSFWorkbook workbook = null;
             try {
                 FileInputStream inputStream = new FileInputStream(file);
@@ -94,7 +100,7 @@ public class ExcelData {
             }
         }
 
-        // gen student list
+        // extract a student class from the stuMap to record the average grade and set to a student list
         List<Student> stuList = new ArrayList<>();
         Set<String> keySet = stuMap.keySet();
         for (String key : keySet) {
