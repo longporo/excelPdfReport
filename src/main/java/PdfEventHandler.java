@@ -14,7 +14,7 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
  * @version 1.0, 2021-10-29 23:32
  * @since ExcelPDFReports 0.0.1
  */
-public class PdfEventhandler implements IEventHandler {
+public class PdfEventHandler implements IEventHandler {
 
     @Override
     public void handleEvent(Event event) {

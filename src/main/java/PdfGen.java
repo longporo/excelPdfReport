@@ -1,4 +1,5 @@
 import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
@@ -10,8 +11,14 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.*;
-import com.itextpdf.layout.property.*;
+import com.itextpdf.layout.property.AreaBreakType;
+import com.itextpdf.layout.property.HorizontalAlignment;
+import com.itextpdf.layout.property.TextAlignment;
+import com.itextpdf.layout.property.UnitValue;
+import org.jfree.chart.ChartUtils;
+import org.jfree.data.category.DefaultCategoryDataset;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -27,7 +34,7 @@ public class PdfGen {
         PdfWriter writer = new PdfWriter(Frame.PDF_FILE_PATH);
         // Creating a PdfDocument
         PdfDocument pdfDoc = new PdfDocument(writer);
-        pdfDoc.addEventHandler(PdfDocumentEvent.START_PAGE, new PdfEventhandler());
+        pdfDoc.addEventHandler(PdfDocumentEvent.START_PAGE, new PdfEventHandler());
 
         PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA);
         Document document = new Document(pdfDoc);
@@ -351,6 +358,13 @@ public class PdfGen {
      * @author Zihao Long
      */
     public static void addGradeStats(List<Student> stuList, PdfDocument mainPdf, Document document) throws IOException {
+        //spacing
+        paraLineBreaks(document, 1);
+        //add heading
+        addPara(document);
+        addLineBreak(document);
+        paraLineBreaks(document, 2);
+
         // calculate stats
         // Median
         BigDecimal median;
@@ -417,42 +431,33 @@ public class PdfGen {
             gradeMap.put(key, gradeMap.get(key) + 1);
         }
 
-        // 2 columns table
-        Table table = new Table(UnitValue.createPercentArray(new float[]{5, 5}));
-        table.setHorizontalAlignment(HorizontalAlignment.CENTER)
-                .setBackgroundColor(GREY_COLOR)
-                .setFontColor(ORANGE_COLOR)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setWidth(500)
-                .setPageNumber(2);
+        // add barChart for grade stats
+        String gradeRowKey = "Grade";
+        ByteArrayOutputStream gradeBos = new ByteArrayOutputStream();
+        DefaultCategoryDataset gradeDataset = new DefaultCategoryDataset();
+        gradeDataset.addValue(median, gradeRowKey,"Median");
+        gradeDataset.addValue(average, gradeRowKey,"Average");
+        gradeDataset.addValue(standardDeviation, gradeRowKey,"S.D.");
+        gradeDataset.addValue(maxScore, gradeRowKey,"Max");
+        gradeDataset.addValue(minScore, gradeRowKey,"Min");
+        ChartUtils.writeChartAsJPEG(gradeBos, ChartUtil.barChart("Grade Stats", "", "", gradeDataset), 850, 430);
+        Image gradeImg = new Image(ImageDataFactory.create(gradeBos.toByteArray()));
+        document.add(gradeImg);
 
-        // add table header
-        Cell titleCell = new Cell(1, 10).add(new Paragraph("Grade Stats"));
-        titleCell.setPaddingTop(10f);
-        titleCell.setPaddingBottom(10f);
-        titleCell.setFontSize(15f);
-        table.addCell(titleCell);
-
-        // add content
-        addCellsTo2ColumnsTable(table, "Median", decimalToString(median));
-        addCellsTo2ColumnsTable(table, "Average", decimalToString(average));
-        addCellsTo2ColumnsTable(table, "Standard Deviation", decimalToString(new BigDecimal(standardDeviation)));
-        addCellsTo2ColumnsTable(table, "Max", decimalToString(maxScore));
-        addCellsTo2ColumnsTable(table, "Min", decimalToString(minScore));
-        addCellsTo2ColumnsTable(table, "\n", "");
-        addCellsTo2ColumnsTable(table, "Count of grades:", String.valueOf(size));
-        Set<String> gradeKeySet = gradeMap.keySet();
-        for (String key : gradeKeySet) {
-            addCellsTo2ColumnsTable(table, key, gradeMap.get(key).toString());
-        }
-
-        //spacing
+        // split
         paraLineBreaks(document, 1);
-        //add heading
-        addPara(document);
-        addLineBreak(document);
-        paraLineBreaks(document, 2);
-        document.add(table);
+
+        // add lineChart for counts stats
+        ByteArrayOutputStream countBos = new ByteArrayOutputStream();
+        DefaultCategoryDataset categoryDataset1 = new DefaultCategoryDataset();
+        Set<String> gradeKeySet = gradeMap.keySet();
+        String countRowKey = "Total Counts: " + size;
+        for (String key : gradeKeySet) {
+            categoryDataset1.addValue(gradeMap.get(key), countRowKey, key);
+        }
+        ChartUtils.writeChartAsJPEG(countBos, ChartUtil.lineChart("Count Stats", "", "", categoryDataset1), 850, 430);
+        Image countImg = new Image(ImageDataFactory.create(countBos.toByteArray()));
+        document.add(countImg);
     }
 
     /**
