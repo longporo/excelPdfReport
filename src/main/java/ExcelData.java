@@ -26,7 +26,7 @@ public class ExcelData {
 
     public static void getExcelData(String excelPath) throws Exception {
         List<File> fileList = new ArrayList<>();
-        String[] filePathArr = excelPath.split(Frame.FILE_PATH_SPLIT_STR);
+        String[] filePathArr = excelPath.split(Constant.FILE_PATH_SPLIT_STR);
         for (String filePath : filePathArr) {
             File inputFile = new File(filePath);
             File[] files = new File[]{inputFile};
@@ -47,9 +47,9 @@ public class ExcelData {
             throw new RuntimeException("No data found in the excel file.");
         }
 
-        Frame.logger.info("Parsing excel data successfully...");
+        Constant.logger.info("Parsing excel data successfully...");
 
-        if (Frame.IS_GENERATE_PDF) {
+        if (Constant.IS_GENERATE_PDF) {
             generatePdf(stuList);
         } else {
             combineToFile(stuList);
@@ -64,7 +64,7 @@ public class ExcelData {
      * @author Zihao Long
      */
     private static void combineToFile(List<Student> stuList) throws Exception {
-        Frame.logger.info("Combining files...");
+        Constant.logger.info("Combining files...");
         HSSFWorkbook wb = new HSSFWorkbook();
         HSSFSheet sheet = wb.createSheet("Sheet1");
         HSSFRow row = sheet.createRow(0);
@@ -108,7 +108,7 @@ public class ExcelData {
         for (int i = 0; i < KEY_ARRAY.length; i++) {
             sheet.setColumnWidth(i, 10 * 256);
         }
-        wb.write(new File(Frame.TARGET_FILE_PATH));
+        wb.write(new File(Constant.TARGET_FILE_PATH));
     }
 
     /**
@@ -119,7 +119,7 @@ public class ExcelData {
      * @author Zihao Long
      */
     private static void generatePdf(List<Student> stuList) throws Exception {
-        Frame.logger.info("Generating PDF file...");
+        Constant.logger.info("Generating PDF file...");
         Map<String, Map<String, Student>> stuMap = new HashMap<>(16);
         for (Student student : stuList) {
             String studentNo = student.getStudentNo();

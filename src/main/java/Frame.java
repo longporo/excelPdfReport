@@ -20,38 +20,6 @@ import java.util.Scanner;
 public class Frame {
 
     /**
-     * Define the option selected
-     */
-    public static boolean IS_GENERATE_PDF = false;
-
-    /**
-     * Define current system, the default is windows
-     */
-    private static boolean IS_WINDOWS = false;
-    private static boolean IS_MAC_OS = false;
-
-    /**
-     * The file path notation
-     *
-     */
-    public static String FILE_PATH_NOTATION = null;
-
-    /**
-     * The target absolute file path
-     */
-    public static String TARGET_FILE_PATH;
-
-    /**
-     * The file path split string, used when select multiple files
-     */
-    public static final String FILE_PATH_SPLIT_STR = "#.#";
-
-    /**
-     * The logger
-     */
-    public static Logger logger = Logger.getLogger(Frame.class);
-
-    /**
      * GUI info
      */
     private JTextPane log_textarea;
@@ -108,7 +76,7 @@ public class Frame {
                     File file = fileArr[i];
                     filePath += file.getAbsolutePath();
                     if (i != fileArr.length - 1) {
-                        filePath += Frame.FILE_PATH_SPLIT_STR;
+                        filePath += Constant.FILE_PATH_SPLIT_STR;
                     }
                 }
                 excel_input.setText(filePath);
@@ -170,44 +138,44 @@ public class Frame {
         try {
 
             // get system info
-            if ( FILE_PATH_NOTATION == null) {
+            if ( Constant.FILE_PATH_NOTATION == null) {
                 String osName = System.getProperty("os.name");
                 if (osName.startsWith("Windows")) {
-                    IS_WINDOWS = true;
-                    FILE_PATH_NOTATION = "\\";
+                    Constant.IS_WINDOWS = true;
+                    Constant.FILE_PATH_NOTATION = "\\";
                 } else {
                     // MacOs, linux
-                    IS_MAC_OS = true;
-                    FILE_PATH_NOTATION = "/";
+                    Constant.IS_MAC_OS = true;
+                    Constant.FILE_PATH_NOTATION = "/";
                 }
             }
 
             String fileName = "Main.pdf";
             if ("Generate PDF".equalsIgnoreCase(selectedStr)) {
-                IS_GENERATE_PDF = true;
+                Constant.IS_GENERATE_PDF = true;
             } else if ("Combine files into one".equalsIgnoreCase(selectedStr)) {
-                IS_GENERATE_PDF = false;
+                Constant.IS_GENERATE_PDF = false;
                 fileName = "project-marking-combined.xlsx";
             }
 
             // set absolute path
-            TARGET_FILE_PATH = pdfDirPath + FILE_PATH_NOTATION + fileName;
+            Constant.TARGET_FILE_PATH = pdfDirPath + Constant.FILE_PATH_NOTATION + fileName;
 
-            logger.info("Reading excel file...");
+            Constant.logger.info("Reading excel file...");
 
             ExcelData.getExcelData(excelFilePath);
 
-            logger.info("SUCCESS!!!");
+            Constant.logger.info("SUCCESS!!!");
 
             // Ask if open file
             int confirmResult = JOptionPane.showConfirmDialog(null, "File has been successfully generated! Open it?", "Prompt", 0);
             if (confirmResult == 1) {
                 return;
             }
-            openFile(TARGET_FILE_PATH);
+            openFile(Constant.TARGET_FILE_PATH);
         } catch (Exception e) {
 //            e.printStackTrace();
-            logger.error(e.getMessage());
+            Constant.logger.error(e.getMessage());
         }
     }
 
@@ -219,9 +187,9 @@ public class Frame {
      * @author Zihao Long
      */
     private static void openFile(String filePath) throws IOException {
-        if (IS_WINDOWS) {
+        if (Constant.IS_WINDOWS) {
             Runtime.getRuntime().exec("explorer.exe /select, " + filePath);
-        } else if (IS_MAC_OS) {
+        } else if (Constant.IS_MAC_OS) {
             Runtime.getRuntime().exec("open " + filePath);
         }
     }
