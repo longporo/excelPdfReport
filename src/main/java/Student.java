@@ -1,5 +1,3 @@
-import org.apache.commons.lang3.StringUtils;
-
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -189,10 +187,6 @@ public class Student {
     }
 
     public void setProjectType(String projectType) {
-        // clear the decimal point
-        if (!StringUtils.isEmpty(projectType)) {
-            projectType = Integer.valueOf(projectType).toString();
-        }
         this.projectType = projectType;
     }
 

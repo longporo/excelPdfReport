@@ -1,4 +1,10 @@
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -16,12 +22,9 @@ public class ExcelData {
 
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0");
 
-    private static final String[] KEY_ARRAY = new String[]{"grader", "projectNo", "role", "otherGrader", "studentName", "studentNo", "projectType", "credit", "grade", "abstractScr", "abstractScrX", "motivation", "motivationX", "background", "backgroundX", "problem", "problemX", "solution", "solutionX", "cte", "cteX", "presentation", "presentationX", "comment", "title"};
+    private static final String[][] KEY_ARRAY = {{"grader", "Grader"}, {"projectNo", "Project No."}, {"role", "Role"}, {"otherGrader", "Other grader"}, {"studentName", "Student"}, {"studentNo", "SN."}, {"projectType", "Project type"}, {"credit", "Credit"}, {"grade", "Scr"}, {"abstractScr", "Abstract"}, {"abstractScrX", "/X"}, {"motivation", "Motivation"}, {"motivationX", "/X"}, {"background", "Background"}, {"backgroundX", "/X"}, {"problem", "Problem"}, {"problemX", "/X"}, {"solution", "Solution"}, {"solutionX", "/X"}, {"cte", "Conclusion or Testing and Evaluation"}, {"cteX", "/X"}, {"presentation", "Presentation"}, {"presentationX", "/X"}, {"comment", "Comment"}, {"title", "Title"}};
 
-    public static void getExcelData(String excelPath, String pdfPath) throws Exception {
-
-        Frame.PDF_FILE_PATH = pdfPath + "Main.pdf";
-
+    public static void getExcelData(String excelPath) throws Exception {
         List<File> fileList = new ArrayList<>();
         String[] filePathArr = excelPath.split(Frame.FILE_PATH_SPLIT_STR);
         for (String filePath : filePathArr) {
@@ -45,10 +48,110 @@ public class ExcelData {
         }
 
         Frame.logger.info("Parsing excel data successfully...");
-        Frame.logger.info("Generating PDF file...");
 
+        if (Frame.IS_GENERATE_PDF) {
+            generatePdf(stuList);
+        } else {
+            combineToFile(stuList);
+        }
+    }
+
+    /**
+     * Set data to file<br>
+     *
+     * @param [pdfPath, stuList]
+     * @return void
+     * @author Zihao Long
+     */
+    private static void combineToFile(List<Student> stuList) throws Exception {
+        Frame.logger.info("Combining files...");
+        HSSFWorkbook wb = new HSSFWorkbook();
+        HSSFSheet sheet = wb.createSheet("Sheet1");
+        HSSFRow row = sheet.createRow(0);
+
+        for (int i = 0; i < KEY_ARRAY.length; i++) {
+            HSSFCell cell = row.createCell(i);
+            cell.setCellValue(KEY_ARRAY[i][1]);
+        }
+
+        // merge 'Conclusion or Testing and Evaluation' cell
+        CellRangeAddress region = new CellRangeAddress(0, 1, 19, 19);
+        sheet.addMergedRegion(region);
+
+        int n = 1;
+        for (Student student : stuList) {
+            Field[] fields = student.getClass().getDeclaredFields();
+            row = sheet.createRow(n + 1);
+            for (int j = 0; j < KEY_ARRAY.length; j++) {
+                for (int i = 0; i < fields.length; i++) {
+                    if (fields[i].getName().equals(KEY_ARRAY[j][0])) {
+                        fields[i].setAccessible(true);
+                        Object fieldObj = fields[i].get(student);
+                        if (fieldObj == null || fieldObj.toString().isEmpty()) {
+                            row.createCell(j).setCellValue("");
+                            break;
+                        }
+                        if ((fieldObj instanceof Number)) {
+                            HSSFCell cell = row.createCell(j);
+                            cell.setCellType(CellType.NUMERIC);
+                            cell.setCellValue(Double.parseDouble(fieldObj.toString()));
+                            break;
+                        }
+                        row.createCell(j).setCellValue(fieldObj.toString());
+                        break;
+                    }
+                }
+            }
+            n++;
+        }
+        // set column width
+        for (int i = 0; i < KEY_ARRAY.length; i++) {
+            sheet.setColumnWidth(i, 10 * 256);
+        }
+        wb.write(new File(Frame.TARGET_FILE_PATH));
+    }
+
+    /**
+     * Generate pdf<br>
+     *
+     * @param [stuList]
+     * @return void
+     * @author Zihao Long
+     */
+    private static void generatePdf(List<Student> stuList) throws Exception {
+        Frame.logger.info("Generating PDF file...");
+        Map<String, Map<String, Student>> stuMap = new HashMap<>(16);
+        for (Student student : stuList) {
+            String studentNo = student.getStudentNo();
+            Map<String, Student> stuSubMap = stuMap.get(studentNo);
+            if (stuSubMap == null) {
+                stuSubMap = new HashMap<>(2);
+                stuMap.put(studentNo, stuSubMap);
+            }
+            stuSubMap.put(student.getRole(), student);
+        }
+
+        // extract a student class from the stuMap to record the average grade and set to a student list
+        List<Student> setStuList = new ArrayList<>();
+        Set<String> keySet = stuMap.keySet();
+        for (String key : keySet) {
+            Map<String, Student> graderMap = stuMap.get(key);
+            Set<String> graderSet = graderMap.keySet();
+            BigDecimal totalGrade = BigDecimal.ZERO;
+            int count = 0;
+            Student tmpStu = null;
+            for (String graderKey : graderSet) {
+                tmpStu = graderMap.get(graderKey);
+                totalGrade = totalGrade.add(tmpStu.getGrade());
+                count++;
+            }
+            BigDecimal avgGrade = totalGrade.divide(new BigDecimal(count)).setScale(1, BigDecimal.ROUND_UP);
+            tmpStu.setAvgGrade(avgGrade);
+            tmpStu.setGraderMap(graderMap);
+            setStuList.add(tmpStu);
+        }
         // generate content to pdf
-        PdfGen.generatePdf(stuList);
+        PdfGen.generatePdf(setStuList);
     }
 
     /**
@@ -59,7 +162,7 @@ public class ExcelData {
      * @author Zihao Long
      */
     private static List<Student> getImportData(List<File> fileList) throws Exception {
-        Map<String, Map<String, Student>> stuMap = new HashMap<>(16);
+        List<Student> stuList = new ArrayList<>();
         for (File file : fileList) {
             XSSFWorkbook workbook = null;
             try {
@@ -81,43 +184,24 @@ public class ExcelData {
 
                     Student student = new Student();
                     for (int j = 0; j < KEY_ARRAY.length; j++) {
-                        String key = KEY_ARRAY[j];
-                        setValToStu(key, handleCellType(row.getCell(j)), student);
+                        String key = KEY_ARRAY[j][0];
+                        String cellValue;
+                        // the project type will be read as numeric type
+                        if (key.equals("projectType")) {
+                            Double holder = row.getCell(j).getNumericCellValue();
+                            cellValue = holder.intValue() + "";
+                        } else {
+                            cellValue = handleCellType(row.getCell(j));
+                        }
+                        setValToStu(key, cellValue, student);
                     }
-
-                    String studentNo = student.getStudentNo();
-                    Map<String, Student> stuSubMap = stuMap.get(studentNo);
-                    if (stuSubMap == null) {
-                        stuSubMap = new HashMap<>(2);
-                        stuMap.put(studentNo, stuSubMap);
-                    }
-                    stuSubMap.put(student.getRole(), student);
+                    stuList.add(student);
                 }
             } finally {
                 if (workbook != null) {
                     workbook.close();
                 }
             }
-        }
-
-        // extract a student class from the stuMap to record the average grade and set to a student list
-        List<Student> stuList = new ArrayList<>();
-        Set<String> keySet = stuMap.keySet();
-        for (String key : keySet) {
-            Map<String, Student> graderMap = stuMap.get(key);
-            Set<String> graderSet = graderMap.keySet();
-            BigDecimal totalGrade = BigDecimal.ZERO;
-            int count = 0;
-            Student tmpStu = null;
-            for (String graderKey : graderSet) {
-                tmpStu = graderMap.get(graderKey);
-                totalGrade = totalGrade.add(tmpStu.getGrade());
-                count++;
-            }
-            BigDecimal avgGrade = totalGrade.divide(new BigDecimal(count)).setScale(1, BigDecimal.ROUND_UP);
-            tmpStu.setAvgGrade(avgGrade);
-            tmpStu.setGraderMap(graderMap);
-            stuList.add(tmpStu);
         }
         return stuList;
     }
@@ -157,7 +241,7 @@ public class ExcelData {
         String str;
         switch (cell.getCellType()) {
             case STRING:
-                str = cell.getStringCellValue();
+                str = cell.getStringCellValue().trim();
                 break;
             case NUMERIC:
                 Double holder = cell.getNumericCellValue();

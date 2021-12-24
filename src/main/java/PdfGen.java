@@ -31,7 +31,7 @@ public class PdfGen {
     private static final Color GREY_COLOR =  new DeviceRgb(127, 127, 127);
 
     public static void generatePdf(List<Student> stuList) throws Exception {
-        PdfWriter writer = new PdfWriter(Frame.PDF_FILE_PATH);
+        PdfWriter writer = new PdfWriter(Frame.TARGET_FILE_PATH);
         // Creating a PdfDocument
         PdfDocument pdfDoc = new PdfDocument(writer);
         pdfDoc.addEventHandler(PdfDocumentEvent.START_PAGE, new PdfEventHandler());

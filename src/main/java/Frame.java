@@ -20,6 +20,11 @@ import java.util.Scanner;
 public class Frame {
 
     /**
+     * Define the option selected
+     */
+    public static boolean IS_GENERATE_PDF = false;
+
+    /**
      * Define current system, the default is windows
      */
     private static boolean IS_WINDOWS = false;
@@ -32,9 +37,9 @@ public class Frame {
     public static String FILE_PATH_NOTATION = null;
 
     /**
-     * The pdf absolute file path
+     * The target absolute file path
      */
-    public static String PDF_FILE_PATH;
+    public static String TARGET_FILE_PATH;
 
     /**
      * The file path split string, used when select multiple files
@@ -59,6 +64,7 @@ public class Frame {
     private JPanel pdf_div;
     private JPanel start_div;
     private JPanel body;
+    private JComboBox optionSelect;
 
     public static void main(String[] args) throws IOException {
         // init frame
@@ -127,13 +133,19 @@ public class Frame {
             public void actionPerformed(ActionEvent actionEvent) {
                 String excelFilePath = excel_input.getText();
                 String pdfDirPath = pdf_input.getText();
+                String selectedStr = (String) optionSelect.getSelectedItem();
+
+                if ("Select an option".equalsIgnoreCase(selectedStr)) {
+                    JOptionPane.showMessageDialog(null, "Please select an option.", "Warning", 2);
+                    return;
+                }
 
                 if (" Select a folder or excel file...".equalsIgnoreCase(excelFilePath)) {
                     JOptionPane.showMessageDialog(null, "Please select a folder or excel file.", "Warning", 2);
                     return;
                 }
-                if (" Select a folder to save pdf...".equalsIgnoreCase(pdfDirPath)) {
-                    JOptionPane.showMessageDialog(null, "Please select a folder to save pdf.", "Warning", 2);
+                if (" Select a folder to save file...".equalsIgnoreCase(pdfDirPath)) {
+                    JOptionPane.showMessageDialog(null, "Please select a folder to save file.", "Warning", 2);
                     return;
                 }
                 int confirmResult = JOptionPane.showConfirmDialog(null, "Start to generate?", "Prompt", 0);
@@ -142,7 +154,7 @@ public class Frame {
                 }
 
                 // Generate
-                generatePdf(excelFilePath, pdfDirPath);
+                generatePdf(excelFilePath, pdfDirPath, selectedStr);
             }
         });
     }
@@ -154,7 +166,7 @@ public class Frame {
      * @return void
      * @author Zihao Long
      */
-    private static void generatePdf(String excelFilePath, String pdfDirPath) {
+    private static void generatePdf(String excelFilePath, String pdfDirPath, String selectedStr) {
         try {
 
             // get system info
@@ -170,20 +182,31 @@ public class Frame {
                 }
             }
 
+            String fileName = "Main.pdf";
+            if ("Generate PDF".equalsIgnoreCase(selectedStr)) {
+                IS_GENERATE_PDF = true;
+            } else if ("Combine files into one".equalsIgnoreCase(selectedStr)) {
+                IS_GENERATE_PDF = false;
+                fileName = "project-marking-combined.xlsx";
+            }
+
+            // set absolute path
+            TARGET_FILE_PATH = pdfDirPath + FILE_PATH_NOTATION + fileName;
+
             logger.info("Reading excel file...");
 
-            ExcelData.getExcelData(excelFilePath,pdfDirPath + FILE_PATH_NOTATION);
+            ExcelData.getExcelData(excelFilePath);
 
             logger.info("SUCCESS!!!");
 
             // Ask if open file
-            int confirmResult = JOptionPane.showConfirmDialog(null, "PDF has been generated! Open it?", "Prompt", 0);
+            int confirmResult = JOptionPane.showConfirmDialog(null, "File has been successfully generated! Open it?", "Prompt", 0);
             if (confirmResult == 1) {
                 return;
             }
-            openFile(PDF_FILE_PATH);
+            openFile(TARGET_FILE_PATH);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             logger.error(e.getMessage());
         }
     }
