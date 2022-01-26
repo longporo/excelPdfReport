@@ -1,6 +1,9 @@
+package util;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
 import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
@@ -27,11 +30,6 @@ import java.text.NumberFormat;
  * @author Zihao Long
  */
 public class ChartUtil{
-    private static final Color[] BAR_COLORS = new Color[]{
-            new Color(79,129,189),
-            new Color(192, 80, 77),
-            new Color(155, 187, 89),
-    };
 
     private static final Color[] PIE_COLORS = new Color[]{
             new Color(75, 172, 198),
@@ -66,11 +64,11 @@ public class ChartUtil{
     /**
      * Generate a line chart<br>
      *
-     * @param [title, categoryAxisLabel, valueAxisLabel, dataset]
+     * @param [title, categoryAxisLabel, valueAxisLabel, dataset, yAxiosIntValue]
      * @return org.jfree.chart.JFreeChart
      * @author Zihao Long
      */
-    public static JFreeChart lineChart(String title, String categoryAxisLabel, String valueAxisLabel, DefaultCategoryDataset dataset){
+    public static JFreeChart lineChart(String title, String categoryAxisLabel, String valueAxisLabel, DefaultCategoryDataset dataset, boolean yAxiosIntValue){
         ChartFactory.setChartTheme(initChartTheme());
 
         JFreeChart chart = ChartFactory.createLineChart(
@@ -84,9 +82,17 @@ public class ChartUtil{
                 false
         );
 
+
         CategoryPlot plot = chart.getCategoryPlot();
+
+        if (yAxiosIntValue) {
+            // set int value on y-axis
+            NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
+            rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+        }
+
         LineAndShapeRenderer renderer = (LineAndShapeRenderer) plot.getRenderer();
-        // 折现点显示数值
+        // show item label
         renderer.setDefaultItemLabelsVisible(true);
         renderer.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
         return chart;
@@ -127,7 +133,7 @@ public class ChartUtil{
         // bar max width
         renderer.setMaximumBarWidth(0.05);
         // bar color
-        renderer.setSeriesPaint(0, BAR_COLORS[0]);
+        renderer.setSeriesPaint(0, new Color(79,129,189));
         return chart;
     }
 

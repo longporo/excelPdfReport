@@ -1,6 +1,8 @@
 import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.WriterAppender;
+import service.MyService;
+import util.Constant;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
@@ -17,7 +19,7 @@ import java.util.Scanner;
  * @version 1.0, 2021年09月26日 03:28
  * @since excelToPdf 0.0.1
  */
-public class Frame {
+public class MyFrame {
 
     /**
      * GUI info
@@ -34,25 +36,7 @@ public class Frame {
     private JPanel body;
     private JComboBox optionSelect;
 
-    public static void main(String[] args) throws IOException {
-        // init frame
-        JFrame frame = new JFrame("Excel PDF Reports");
-        frame.setSize(575, 400);
-        frame.setContentPane(new Frame().body);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-
-        // window vertical center
-        Toolkit kit = Toolkit.getDefaultToolkit();
-        Dimension screenSize = kit.getScreenSize();
-        int screenWidth = screenSize.width / 2;
-        int screenHeight = screenSize.height / 2;
-        int height = frame.getHeight();
-        int width = frame.getWidth();
-        frame.setLocation(screenWidth - width / 2, screenHeight - height / 2);
-    }
-
-    public Frame() throws IOException {
+    public MyFrame() throws IOException {
 
         // log setting
         Logger root = Logger.getRootLogger();
@@ -121,81 +105,39 @@ public class Frame {
                     return;
                 }
 
-                // Generate
-                generatePdf(excelFilePath, pdfDirPath, selectedStr);
+                // generate file(pdf or excel) by selection
+                MyService.generateBySelection(excelFilePath, pdfDirPath, selectedStr);
             }
         });
     }
 
     /**
-     * The generation method<br>
+     * The main method<br>
      *
-     * @param [excelFilePath, pdfDirPath, selectedStr]
+     * @param [args]
      * @return void
      * @author Zihao Long
      */
-    private static void generatePdf(String excelFilePath, String pdfDirPath, String selectedStr) {
-        try {
+    public static void main(String[] args) throws IOException {
+        // init frame
+        JFrame frame = new JFrame("Excel PDF Reports");
+        frame.setSize(575, 400);
+        frame.setContentPane(new MyFrame().body);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
 
-            // get system info
-            if ( Constant.FILE_PATH_NOTATION == null) {
-                String osName = System.getProperty("os.name");
-                if (osName.startsWith("Windows")) {
-                    Constant.IS_WINDOWS = true;
-                    Constant.FILE_PATH_NOTATION = "\\";
-                } else {
-                    // MacOs, linux
-                    Constant.IS_MAC_OS = true;
-                    Constant.FILE_PATH_NOTATION = "/";
-                }
-            }
-
-            String fileName = "Main.pdf";
-            if ("Generate PDF".equalsIgnoreCase(selectedStr)) {
-                Constant.IS_GENERATE_PDF = true;
-            } else if ("Combine files into one".equalsIgnoreCase(selectedStr)) {
-                Constant.IS_GENERATE_PDF = false;
-                fileName = "project-marking-combined.xlsx";
-            }
-
-            // set absolute path
-            Constant.TARGET_FILE_PATH = pdfDirPath + Constant.FILE_PATH_NOTATION + fileName;
-
-            Constant.logger.info("Reading excel file...");
-
-            ExcelData.getExcelData(excelFilePath);
-
-            Constant.logger.info("SUCCESS!!!");
-
-            // Ask if open file
-            int confirmResult = JOptionPane.showConfirmDialog(null, "File has been successfully generated! Open it?", "Prompt", 0);
-            if (confirmResult == 1) {
-                return;
-            }
-            openFile(Constant.TARGET_FILE_PATH);
-        } catch (Exception e) {
-//            e.printStackTrace();
-            Constant.logger.error(e.getMessage());
-        }
+        // window vertical center
+        Toolkit kit = Toolkit.getDefaultToolkit();
+        Dimension screenSize = kit.getScreenSize();
+        int screenWidth = screenSize.width / 2;
+        int screenHeight = screenSize.height / 2;
+        int height = frame.getHeight();
+        int width = frame.getWidth();
+        frame.setLocation(screenWidth - width / 2, screenHeight - height / 2);
     }
 
     /**
-     * Open file by command line<br>
-     *
-     * @param []
-     * @return void
-     * @author Zihao Long
-     */
-    private static void openFile(String filePath) throws IOException {
-        if (Constant.IS_WINDOWS) {
-            Runtime.getRuntime().exec("explorer.exe /select, " + filePath);
-        } else if (Constant.IS_MAC_OS) {
-            Runtime.getRuntime().exec("open " + filePath);
-        }
-    }
-
-    /**
-     * show excel file dialog<br>
+     * Show excel file dialog<br>
      *
      * @param [type]
      * @return java.io.File
@@ -211,7 +153,7 @@ public class Frame {
                 if (file.isDirectory()) {
                     return true;
                 }
-                return filterExcelFile(file);
+                return MyService.filterExcelFile(file);
             }
 
             @Override
@@ -228,27 +170,7 @@ public class Frame {
     }
 
     /**
-     * Filter excel file<br>
-     *
-     * @param [file]
-     * @return boolean
-     * @author Zihao Long
-     */
-    public static boolean filterExcelFile(File file) {
-        String fileName = file.getName().toLowerCase();
-        if (fileName.endsWith("csv")
-                || fileName.endsWith("xls")
-                || fileName.endsWith("xlsx")) {
-            if (fileName.startsWith(".")) {
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * show directory choosing dialog<br>
+     * Show directory choosing dialog<br>
      *
      * @param [type
      * @return java.io.File

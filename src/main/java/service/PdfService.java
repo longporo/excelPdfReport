@@ -1,3 +1,5 @@
+package service;
+
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.io.image.ImageDataFactory;
 import com.itextpdf.kernel.colors.Color;
@@ -17,6 +19,9 @@ import com.itextpdf.layout.property.TextAlignment;
 import com.itextpdf.layout.property.UnitValue;
 import org.jfree.chart.ChartUtils;
 import org.jfree.data.category.DefaultCategoryDataset;
+import pojo.Student;
+import util.ChartUtil;
+import util.Constant;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,12 +30,86 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.*;
 
-public class PdfGen {
+/**
+ * The Pdf service<br>
+ *
+ * @param
+ * @return
+ * @author Zihao Long
+ */
+public class PdfService {
 
+    /**
+     * The orange color
+     */
     private static final Color ORANGE_COLOR = new DeviceRgb(251, 190, 8);
+
+    /**
+     * The grey color
+     */
     private static final Color GREY_COLOR =  new DeviceRgb(127, 127, 127);
 
+    /**
+     * Handle student list<br>
+     *
+     * @param [stuList]
+     * @return void
+     * @author Zihao Long
+     */
+    public static List<Student> handleStuList(List<Student> stuList) {
+        // key: studentNo, value: { key : role(Supervisor, 2nd Reader, 3rd Reader), value: student}
+        Map<String, Map<String, Student>> stuMap = new HashMap<>(16);
+        for (Student student : stuList) {
+            String studentNo = student.getStudentNo();
+            Map<String, Student> stuSubMap = stuMap.get(studentNo);
+            if (stuSubMap == null) {
+                stuSubMap = new HashMap<>(2);
+                stuMap.put(studentNo, stuSubMap);
+            }
+            stuSubMap.put(student.getRole(), student);
+        }
+
+        // extract a student class from the stuMap to record the average grade and set to a student list
+        List<Student> setStuList = new ArrayList<>();
+        Set<String> keySet = stuMap.keySet();
+        for (String key : keySet) {
+            Map<String, Student> graderMap = stuMap.get(key);
+            Set<String> graderSet = graderMap.keySet();
+            BigDecimal totalGrade = BigDecimal.ZERO;
+            int count = 0;
+            Student tmpStu = null;
+            for (String graderKey : graderSet) {
+                tmpStu = graderMap.get(graderKey);
+                totalGrade = totalGrade.add(tmpStu.getGrade());
+                count++;
+            }
+            BigDecimal avgGrade = totalGrade.divide(new BigDecimal(count)).setScale(1, BigDecimal.ROUND_UP);
+            tmpStu.setAvgGrade(avgGrade);
+            tmpStu.setGraderMap(graderMap);
+            setStuList.add(tmpStu);
+
+            // sort by grade desc
+            Collections.sort(setStuList, new Comparator<Student>() {
+                @Override
+                public int compare(Student o1, Student o2) {
+                    return o2.getAvgGrade().compareTo(o1.getAvgGrade());
+                }
+            });
+        }
+        return setStuList;
+    }
+
+    /**
+     * Generate Pdf by student list<br>
+     *
+     * @param [stuList]
+     * @return void
+     * @author Zihao Long
+     */
     public static void generatePdf(List<Student> stuList) throws Exception {
+        Constant.logger.info("Generating PDF file...");
+        List<Student> handledStuList = handleStuList(stuList);
+
         PdfWriter writer = new PdfWriter(Constant.TARGET_FILE_PATH);
         // Creating a PdfDocument
         PdfDocument pdfDoc = new PdfDocument(writer);
@@ -40,32 +119,31 @@ public class PdfGen {
         Document document = new Document(pdfDoc);
         document.setFont(font);
 
-        // sort by grade desc
-        Collections.sort(stuList, new Comparator<Student>() {
-            @Override
-            public int compare(Student o1, Student o2) {
-                return o2.getAvgGrade().compareTo(o1.getAvgGrade());
-            }
-        });
+        // add student list part
+        addStuListTable(handledStuList, document);
 
-        // add student list
-        addStuListTable(stuList, pdfDoc, document);
-
-        // add grade stats
         // New page
         document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-        addGradeStats(stuList, pdfDoc, document);
+        // add grade stats part
+        addGradeStats(handledStuList, pdfDoc, document);
 
-        // add student grade detail
-        for (Student stu : stuList) {
+        // add student grade detail part
+        for (Student stu : handledStuList) {
             // New page
             document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
-            studentPdf(stu, pdfDoc, document);
+            addGradeDetail(stu, document);
         }
         pdfDoc.close();
     }
 
-    public static void studentPdf(Student stu, PdfDocument pdfDoc, Document document) throws Exception {
+    /**
+     * Add grade detail<br>
+     *
+     * @param [stu, document]
+     * @return void
+     * @author Zihao Long
+     */
+    public static void addGradeDetail(Student stu, Document document) throws Exception {
         //spacing
         paraLineBreaks(document, 1);
         //add heading
@@ -147,7 +225,7 @@ public class PdfGen {
         table2.addCell(new Cell().add(paraUpperRPT.setTextAlignment(TextAlignment.LEFT)).add(paraRoleProjectType));
 
         // graders info
-        float[] tableColumn = student.getGraderTableColumn();
+        float[] tableColumn = MyService.getGraderTableColumn(student);
         Table table3 = new Table(UnitValue.createPercentArray(tableColumn));
         infoTableStyling(table3);
         genGraderInfoByRole(table3, student, "Supervisor", "Supervisor");
@@ -202,7 +280,7 @@ public class PdfGen {
     }
 
     public static void addGradeTable(Document d, Student student) throws Exception {
-        float[] graderTableColumn = student.getGraderTableColumn();
+        float[] graderTableColumn = MyService.getGraderTableColumn(student);
         Table table = new Table(UnitValue.createPercentArray(graderTableColumn));
         table.setHorizontalAlignment(HorizontalAlignment.CENTER)
                 .setBackgroundColor(GREY_COLOR)
@@ -215,7 +293,7 @@ public class PdfGen {
         addCellByRole(table, student, "3rd Reader", "Third Reader");
 
         //4 cell modules (grades+results)
-        float[] gradeTableColumn = student.getGradeTableColumn();
+        float[] gradeTableColumn = MyService.getGradeTableColumn(student);
         Table table2 = new Table(UnitValue.createPercentArray(gradeTableColumn));
         table2.setHorizontalAlignment(HorizontalAlignment.CENTER)
                 .setBackgroundColor(GREY_COLOR)
@@ -380,7 +458,7 @@ public class PdfGen {
         for (Student stu : stuList) {
             totalScore = totalScore.add(stu.getAvgGrade());
         }
-        BigDecimal average = totalScore.divide(new BigDecimal(stuList.size()), 5, BigDecimal.ROUND_UP);
+        BigDecimal average = totalScore.divide(new BigDecimal(stuList.size()), 1, BigDecimal.ROUND_UP);
 
         // Standard Deviation
         double standardDeviation = 0.0;
@@ -455,7 +533,7 @@ public class PdfGen {
         for (String key : gradeKeySet) {
             categoryDataset1.addValue(gradeMap.get(key), countRowKey, key);
         }
-        ChartUtils.writeChartAsJPEG(countBos, ChartUtil.lineChart("Count Stats", "", "", categoryDataset1), 850, 430);
+        ChartUtils.writeChartAsJPEG(countBos, ChartUtil.lineChart("Count Stats", "", "", categoryDataset1, true), 850, 430);
         Image countImg = new Image(ImageDataFactory.create(countBos.toByteArray()));
         document.add(countImg);
     }
@@ -502,7 +580,7 @@ public class PdfGen {
      * @return void
      * @author Zihao Long
      */
-    public static void addStuListTable(List<Student> stuList, PdfDocument mainPdf, Document document) throws IOException {
+    public static void addStuListTable(List<Student> stuList, Document document) throws IOException {
         // 2 columns table
         Table table = new Table(UnitValue.createPercentArray(new float[]{2.5f, 2.5f, 2.5f, 2.5f}));
         table.setHorizontalAlignment(HorizontalAlignment.CENTER)
