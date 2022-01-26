@@ -122,10 +122,8 @@ public class PdfService {
         // add student list part
         addStuListTable(handledStuList, document);
 
-        // New page
-        document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
         // add grade stats part
-        addGradeStats(handledStuList, pdfDoc, document);
+        addGradeStats(handledStuList, document);
 
         // add student grade detail part
         for (Student stu : handledStuList) {
@@ -427,7 +425,7 @@ public class PdfService {
     }
 
     /**
-     * Add grade stats to the first page<br>
+     * Add grade stats<br>
      *
      * @param [stuList, mainPdf]
      * @param stuList
@@ -435,13 +433,7 @@ public class PdfService {
      * @return void
      * @author Zihao Long
      */
-    public static void addGradeStats(List<Student> stuList, PdfDocument mainPdf, Document document) throws IOException {
-        //spacing
-        paraLineBreaks(document, 1);
-        //add heading
-        addPara(document);
-        addLineBreak(document);
-        paraLineBreaks(document, 2);
+    public static void addGradeStats(List<Student> stuList, Document document) throws IOException {
 
         // calculate stats
         // Median
@@ -466,6 +458,7 @@ public class PdfService {
             standardDeviation += Math.pow(stu.getAvgGrade().subtract(average).doubleValue(), 2);
         }
         standardDeviation = Math.sqrt(standardDeviation / size);
+        BigDecimal sdDecimal = new BigDecimal(standardDeviation);
 
         // max and min
         BigDecimal minScore = stuList.get(size - 1).getAvgGrade();
@@ -509,6 +502,87 @@ public class PdfService {
             gradeMap.put(key, gradeMap.get(key) + 1);
         }
 
+        // set 1 scale
+        median = MyService.setDecimalScale(median);
+        average = MyService.setDecimalScale(average);
+        sdDecimal = MyService.setDecimalScale(sdDecimal);
+        maxScore = MyService.setDecimalScale(maxScore);
+        minScore = MyService.setDecimalScale(minScore);
+
+        // add statistical table
+        newPageWithHeader(document);
+        addStatsTable(median, average, sdDecimal, maxScore, minScore, gradeMap, stuList, document);
+
+        // add statistical graphs
+        newPageWithHeader(document);
+        addStatsGraph(median, average, sdDecimal, maxScore, minScore, gradeMap, stuList, document);
+    }
+
+    /**
+     * Add statistical table in text format<br>
+     *
+     * @param [median, average, standardDeviation, maxScore, minScore, gradeMap, stuList, document]
+     * @return void
+     * @author Zihao Long
+     */
+    private static void addStatsTable(BigDecimal median, BigDecimal average, BigDecimal standardDeviation, BigDecimal maxScore, BigDecimal minScore, Map<String, Integer> gradeMap, List<Student> stuList, Document document) throws IOException {
+        // 2 columns table
+        Table table = new Table(UnitValue.createPercentArray(new float[]{5, 5}));
+        table.setHorizontalAlignment(HorizontalAlignment.CENTER)
+                .setBackgroundColor(GREY_COLOR)
+                .setFontColor(ORANGE_COLOR)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setWidth(500)
+                .setPageNumber(2);
+
+        // add table header
+        Cell titleCell = new Cell(1, 10).add(new Paragraph("Grade Stats"));
+        titleCell.setPaddingTop(10f);
+        titleCell.setPaddingBottom(10f);
+        titleCell.setFontSize(15f);
+        table.addCell(titleCell);
+
+        // add content
+        addCellsTo2ColumnsTable(table, "Median", decimalToString(median));
+        addCellsTo2ColumnsTable(table, "Average", decimalToString(average));
+        addCellsTo2ColumnsTable(table, "Standard Deviation", decimalToString(standardDeviation));
+        addCellsTo2ColumnsTable(table, "Max", decimalToString(maxScore));
+        addCellsTo2ColumnsTable(table, "Min", decimalToString(minScore));
+        addCellsTo2ColumnsTable(table, "\n", "");
+        addCellsTo2ColumnsTable(table, "Count of grades:", String.valueOf(stuList.size()));
+        Set<String> gradeKeySet = gradeMap.keySet();
+        for (String key : gradeKeySet) {
+            addCellsTo2ColumnsTable(table, key, gradeMap.get(key).toString());
+        }
+        document.add(table);
+    }
+
+    /**
+     * Add a new page with header<br>
+     *
+     * @param [document]
+     * @return void
+     * @author Zihao Long
+     */
+    private static void newPageWithHeader(Document document) throws IOException {
+        // New page
+        document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+        //spacing
+        paraLineBreaks(document, 1);
+        //add heading
+        addPara(document);
+        addLineBreak(document);
+        paraLineBreaks(document, 2);
+    }
+
+    /**
+     * Add statistical graphs<br>
+     *
+     * @param [median, average, standardDeviation, maxScore, minScore, gradeMap, stuList, document]
+     * @return void
+     * @author Zihao Long
+     */
+    private static void addStatsGraph(BigDecimal median, BigDecimal average, BigDecimal standardDeviation, BigDecimal maxScore, BigDecimal minScore, Map<String, Integer> gradeMap, List<Student> stuList, Document document) throws IOException {
         // add barChart for grade stats
         String gradeRowKey = "Grade";
         ByteArrayOutputStream gradeBos = new ByteArrayOutputStream();
@@ -529,7 +603,7 @@ public class PdfService {
         ByteArrayOutputStream countBos = new ByteArrayOutputStream();
         DefaultCategoryDataset categoryDataset1 = new DefaultCategoryDataset();
         Set<String> gradeKeySet = gradeMap.keySet();
-        String countRowKey = "Total Counts: " + size;
+        String countRowKey = "Total Counts: " + stuList.size();
         for (String key : gradeKeySet) {
             categoryDataset1.addValue(gradeMap.get(key), countRowKey, key);
         }

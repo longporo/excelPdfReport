@@ -6,6 +6,7 @@ import util.Constant;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -164,5 +165,23 @@ public class MyService {
                 tableColumn = new float[]{10};
         }
         return tableColumn;
+    }
+
+    /**
+     * Set BigDecimal scale, default scale is 1<br>
+     *
+     * @param [decimal, scale]
+     * @return java.lang.String
+     * @author Zihao Long
+     */
+    public static BigDecimal setDecimalScale(BigDecimal decimal, int... scaleArr) {
+        if (decimal == null) {
+            return null;
+        }
+        int scale = 1;
+        if (scaleArr.length != 0) {
+            scale = scaleArr[0];
+        }
+        return decimal.setScale(scale, BigDecimal.ROUND_UP);
     }
 }

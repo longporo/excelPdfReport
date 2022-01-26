@@ -62,7 +62,7 @@ public class ExcelService {
             throw new RuntimeException("No data found in the excel file.");
         }
 
-        Constant.logger.info("Parsing excel data successfully...");
+        Constant.logger.info("Successfully parsed excel data...");
         return stuList;
     }
 
