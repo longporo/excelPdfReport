@@ -2,6 +2,8 @@ package util;
 
 import org.apache.log4j.Logger;
 
+import java.util.ResourceBundle;
+
 /**
  * The Constant<br>
  *
@@ -10,6 +12,29 @@ import org.apache.log4j.Logger;
  * @author Zihao Long
  */
 public class Constant {
+
+    /**
+     * The text fields on frame
+     */
+    public static String YEAR_INPUT_LABEL;
+    public static String EXCEL_FILES_SELECTION;
+    public static String SAVE_FOLDER_SELECTION;
+    static {
+        ResourceBundle resource = ResourceBundle.getBundle("frame");
+        YEAR_INPUT_LABEL = resource.getString("year.input.label");
+        EXCEL_FILES_SELECTION = resource.getString("excel.files.selection");
+        SAVE_FOLDER_SELECTION = resource.getString("save.folder.selection");
+    }
+
+    /**
+     * The academic year entered from user interface
+     */
+    public static String ACADEMIC_YEAR = null;
+
+    /**
+     * The grading report page title
+     */
+    public static String GRADING_REPORT_PAGE_TITLE = null;
 
     /**
      * Define the option selected

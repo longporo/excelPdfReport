@@ -40,14 +40,17 @@ public class MyService {
     }
 
     /**
-     * Generate file(pdf or excel) by selection<br>
+     * Generate file(pdf or excel) by selection<br><br>
      *
-     * @param [excelFilePath, pdfDirPath, selectedStr]
+     * @param [academicYear, excelFilePath, pdfDirPath, selectedStr]
      * @return void
      * @author Zihao Long
      */
-    public static void generateBySelection(String excelFilePath, String pdfDirPath, String selectedStr) {
+    public static void generateBySelection(String academicYear, String excelFilePath, String pdfDirPath, String selectedStr) {
         try {
+            // set academic year
+            Constant.ACADEMIC_YEAR = academicYear;
+            Constant.GRADING_REPORT_PAGE_TITLE = "MU Computer Science FYP Grading Report " + academicYear;
 
             // get system info
             if ( Constant.FILE_PATH_NOTATION == null) {
@@ -65,10 +68,10 @@ public class MyService {
             String fileName = null;
             if ("Generate PDF".equalsIgnoreCase(selectedStr)) {
                 Constant.IS_GENERATE_PDF = true;
-                fileName = "Main.pdf";
+                fileName = "Computer_Science_FYP_Grading_Report_" + academicYear + ".pdf";
             } else if ("Combine files into one".equalsIgnoreCase(selectedStr)) {
                 Constant.IS_GENERATE_PDF = false;
-                fileName = "project-marking-combined.xlsx";
+                fileName = "project_marking_combined_"  + academicYear + ".xlsx";
             }
 
             // set absolute path

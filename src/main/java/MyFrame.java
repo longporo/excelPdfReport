@@ -1,3 +1,4 @@
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.WriterAppender;
@@ -35,6 +36,9 @@ public class MyFrame {
     private JPanel start_div;
     private JPanel body;
     private JComboBox optionSelect;
+    private JPanel year_div;
+    private JTextField year_input;
+    private JLabel year_lable;
 
     public MyFrame() throws IOException {
 
@@ -83,30 +87,38 @@ public class MyFrame {
         start_btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
+                String academicYear = year_input.getText();
                 String excelFilePath = excel_input.getText();
                 String pdfDirPath = pdf_input.getText();
                 String selectedStr = (String) optionSelect.getSelectedItem();
+
+                if (StringUtils.isEmpty(academicYear)) {
+                    JOptionPane.showMessageDialog(null, "Please enter an academic year.", "Warning", 2);
+                    return;
+                }
 
                 if ("Select an option".equalsIgnoreCase(selectedStr)) {
                     JOptionPane.showMessageDialog(null, "Please select an option.", "Warning", 2);
                     return;
                 }
 
-                if (" Select a folder or excel file...".equalsIgnoreCase(excelFilePath)) {
-                    JOptionPane.showMessageDialog(null, "Please select a folder or excel file.", "Warning", 2);
+                if (Constant.EXCEL_FILES_SELECTION.equalsIgnoreCase(excelFilePath)) {
+                    JOptionPane.showMessageDialog(null, "Please select excel files or a folder.", "Warning", 2);
                     return;
                 }
-                if (" Select a folder to save file...".equalsIgnoreCase(pdfDirPath)) {
-                    JOptionPane.showMessageDialog(null, "Please select a folder to save file.", "Warning", 2);
+
+                if (Constant.SAVE_FOLDER_SELECTION.equalsIgnoreCase(pdfDirPath)) {
+                    JOptionPane.showMessageDialog(null, "Please select a folder to save the PDF file.", "Warning", 2);
                     return;
                 }
+
                 int confirmResult = JOptionPane.showConfirmDialog(null, "Start to generate?", "Prompt", 0);
                 if (confirmResult == 1) {
                     return;
                 }
 
                 // generate file(pdf or excel) by selection
-                MyService.generateBySelection(excelFilePath, pdfDirPath, selectedStr);
+                MyService.generateBySelection(academicYear, excelFilePath, pdfDirPath, selectedStr);
             }
         });
     }

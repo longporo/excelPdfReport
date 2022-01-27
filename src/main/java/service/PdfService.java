@@ -148,9 +148,11 @@ public class PdfService {
         addPara(document);
         addLineBreak(document);
 
+        // add info table
         paraLineBreaks(document, 2);
         addInfoTable(document, stu);
 
+        // add grade table
         paraLineBreaks(document, 2);
         addGradeTable(document, stu);
     }
@@ -162,9 +164,8 @@ public class PdfService {
     }
 
     public static void addPara(Document d) throws IOException {
-        final String TITLE = "MU Computer Science FYP Grading Report 2021";
         PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA);
-        Paragraph para1 = new Paragraph(TITLE);
+        Paragraph para1 = new Paragraph(Constant.GRADING_REPORT_PAGE_TITLE);
         para1.setTextAlignment(TextAlignment.CENTER);
         para1.setFontSize(20)
                 .setBold()
