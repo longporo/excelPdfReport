@@ -28,8 +28,7 @@ public class MyService {
      */
     public static boolean filterExcelFile(File file) {
         String fileName = file.getName().toLowerCase();
-        if (fileName.endsWith("csv")
-                || fileName.endsWith("xls")
+        if (fileName.endsWith("xls")
                 || fileName.endsWith("xlsx")) {
             if (fileName.startsWith(".")) {
                 return false;
@@ -66,7 +65,7 @@ public class MyService {
             }
 
             String fileName = null;
-            if ("Generate PDF".equalsIgnoreCase(selectedStr)) {
+            if ("Generate a PDF".equalsIgnoreCase(selectedStr)) {
                 Constant.IS_GENERATE_PDF = true;
                 fileName = "Computer_Science_FYP_Grading_Report_" + academicYear + ".pdf";
             } else if ("Combine files into one".equalsIgnoreCase(selectedStr)) {

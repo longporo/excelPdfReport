@@ -170,7 +170,7 @@ public class MyFrame {
 
             @Override
             public String getDescription() {
-                return "folder or excel file (*.csv, *.xls, *.xlsx)";
+                return "folder or excel file (*.xls, *.xlsx)";
             }
         });
 
