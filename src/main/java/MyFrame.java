@@ -89,7 +89,7 @@ public class MyFrame {
             public void actionPerformed(ActionEvent actionEvent) {
                 String academicYear = year_input.getText();
                 String excelFilePath = excel_input.getText();
-                String pdfDirPath = pdf_input.getText();
+                String savingFolderPath = pdf_input.getText();
                 String selectedStr = (String) optionSelect.getSelectedItem();
 
                 if (StringUtils.isEmpty(academicYear)) {
@@ -107,8 +107,8 @@ public class MyFrame {
                     return;
                 }
 
-                if (Constant.SAVE_FOLDER_SELECTION.equalsIgnoreCase(pdfDirPath)) {
-                    JOptionPane.showMessageDialog(null, "Please select a folder to save the PDF file.", "Warning", 2);
+                if (Constant.SAVE_FOLDER_SELECTION.equalsIgnoreCase(savingFolderPath)) {
+                    JOptionPane.showMessageDialog(null, "Please select a folder to save output file.", "Warning", 2);
                     return;
                 }
 
@@ -118,7 +118,7 @@ public class MyFrame {
                 }
 
                 // generate file(pdf or excel) by selection
-                MyService.generateBySelection(academicYear, excelFilePath, pdfDirPath, selectedStr);
+                MyService.generateBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
             }
         });
     }

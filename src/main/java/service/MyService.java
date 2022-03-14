@@ -39,13 +39,13 @@ public class MyService {
     }
 
     /**
-     * Generate file(pdf or excel) by selection<br><br>
+     * Generate file(pdf or excel) by selection<br>
      *
-     * @param [academicYear, excelFilePath, pdfDirPath, selectedStr]
+     * @param [academicYear, excelFilePath, savingFolderPath, selectedStr]
      * @return void
      * @author Zihao Long
      */
-    public static void generateBySelection(String academicYear, String excelFilePath, String pdfDirPath, String selectedStr) {
+    public static void generateBySelection(String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) {
         try {
             // set academic year
             Constant.ACADEMIC_YEAR = academicYear;
@@ -74,7 +74,7 @@ public class MyService {
             }
 
             // set absolute path
-            Constant.TARGET_FILE_PATH = pdfDirPath + Constant.FILE_PATH_NOTATION + fileName;
+            Constant.TARGET_FILE_PATH = savingFolderPath + Constant.FILE_PATH_NOTATION + fileName;
 
             Constant.logger.info("Reading excel file...");
 
