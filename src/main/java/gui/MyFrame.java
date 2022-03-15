@@ -1,3 +1,5 @@
+package gui;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Appender;
 import org.apache.log4j.Logger;
