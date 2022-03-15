@@ -76,7 +76,7 @@ public class MyTest {
     @Test(dataProvider = "regularData")
     public void regularTest(String id, String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) {
         Logger.getRootLogger().setLevel(Level.OFF);
-        MyService.generateBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
+        MyService.genBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
     }
 
     /**
@@ -90,6 +90,6 @@ public class MyTest {
     @Test(dataProvider = "faultModelData")
     public void faultModelTest(String id, String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) {
         Logger.getRootLogger().setLevel(Level.OFF);
-        MyService.generateBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
+        MyService.genBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
     }
 }

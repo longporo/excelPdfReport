@@ -119,7 +119,7 @@ public class MyFrame {
                     }
 
                     // generate file(pdf or excel) by selection
-                    MyService.generateBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
+                    MyService.genBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
 
                     Constant.logger.info("SUCCESS!!!");
 

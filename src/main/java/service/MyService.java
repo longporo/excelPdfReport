@@ -44,7 +44,7 @@ public class MyService {
      * @return void
      * @author Zihao Long
      */
-    public static void generateBySelection(String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) {
+    public static void genBySelection(String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) {
         try {
             // set academic year
             Constant.ACADEMIC_YEAR = academicYear;
