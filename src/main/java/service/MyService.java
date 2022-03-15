@@ -3,7 +3,6 @@ package service;
 import pojo.Student;
 import util.Constant;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -84,16 +83,6 @@ public class MyService {
             } else {
                 ExcelService.combineToFile(stuList);
             }
-
-
-            Constant.logger.info("SUCCESS!!!");
-
-            // Ask if open file
-            int confirmResult = JOptionPane.showConfirmDialog(null, "File has been successfully generated! Open it?", "Prompt", 0);
-            if (confirmResult == 1) {
-                return;
-            }
-            openFile(Constant.TARGET_FILE_PATH);
         } catch (Exception e) {
             e.printStackTrace();
             Constant.logger.error(e.getMessage());
@@ -107,7 +96,7 @@ public class MyService {
      * @return void
      * @author Zihao Long
      */
-    private static void openFile(String filePath) throws IOException {
+    public static void openFile(String filePath) throws IOException {
         if (Constant.IS_WINDOWS) {
             Runtime.getRuntime().exec("explorer.exe /select, " + filePath);
         } else if (Constant.IS_MAC_OS) {

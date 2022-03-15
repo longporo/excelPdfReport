@@ -87,38 +87,52 @@ public class MyFrame {
         start_btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                String academicYear = year_input.getText();
-                String excelFilePath = excel_input.getText();
-                String savingFolderPath = pdf_input.getText();
-                String selectedStr = (String) optionSelect.getSelectedItem();
+                try {
+                    String academicYear = year_input.getText();
+                    String excelFilePath = excel_input.getText();
+                    String savingFolderPath = pdf_input.getText();
+                    String selectedStr = (String) optionSelect.getSelectedItem();
 
-                if (StringUtils.isEmpty(academicYear)) {
-                    JOptionPane.showMessageDialog(null, "Please enter an academic year.", "Warning", 2);
-                    return;
+                    if (StringUtils.isEmpty(academicYear)) {
+                        JOptionPane.showMessageDialog(null, "Please enter an academic year.", "Warning", 2);
+                        return;
+                    }
+
+                    if ("Select an option".equalsIgnoreCase(selectedStr)) {
+                        JOptionPane.showMessageDialog(null, "Please select an option.", "Warning", 2);
+                        return;
+                    }
+
+                    if (Constant.EXCEL_FILES_SELECTION.equalsIgnoreCase(excelFilePath)) {
+                        JOptionPane.showMessageDialog(null, "Please select excel files or a folder.", "Warning", 2);
+                        return;
+                    }
+
+                    if (Constant.SAVE_FOLDER_SELECTION.equalsIgnoreCase(savingFolderPath)) {
+                        JOptionPane.showMessageDialog(null, "Please select a folder to save output file.", "Warning", 2);
+                        return;
+                    }
+
+                    int confirmResult = JOptionPane.showConfirmDialog(null, "Start to generate?", "Prompt", 0);
+                    if (confirmResult == 1) {
+                        return;
+                    }
+
+                    // generate file(pdf or excel) by selection
+                    MyService.generateBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
+
+                    Constant.logger.info("SUCCESS!!!");
+
+                    // ask if open file
+                    confirmResult = JOptionPane.showConfirmDialog(null, "File has been successfully generated! Open it?", "Prompt", 0);
+                    if (confirmResult == 1) {
+                        return;
+                    }
+                    MyService.openFile(Constant.TARGET_FILE_PATH);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Constant.logger.error(e.getMessage());
                 }
-
-                if ("Select an option".equalsIgnoreCase(selectedStr)) {
-                    JOptionPane.showMessageDialog(null, "Please select an option.", "Warning", 2);
-                    return;
-                }
-
-                if (Constant.EXCEL_FILES_SELECTION.equalsIgnoreCase(excelFilePath)) {
-                    JOptionPane.showMessageDialog(null, "Please select excel files or a folder.", "Warning", 2);
-                    return;
-                }
-
-                if (Constant.SAVE_FOLDER_SELECTION.equalsIgnoreCase(savingFolderPath)) {
-                    JOptionPane.showMessageDialog(null, "Please select a folder to save output file.", "Warning", 2);
-                    return;
-                }
-
-                int confirmResult = JOptionPane.showConfirmDialog(null, "Start to generate?", "Prompt", 0);
-                if (confirmResult == 1) {
-                    return;
-                }
-
-                // generate file(pdf or excel) by selection
-                MyService.generateBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
             }
         });
     }
@@ -201,9 +215,9 @@ public class MyFrame {
     /**
      * The thread class, log to GUI<br>
      *
-     * @param 
-     * @return 
+     * @param
      * @author Zihao Long
+     * @return
      */
     class LogToGuiThread extends Thread {
 
