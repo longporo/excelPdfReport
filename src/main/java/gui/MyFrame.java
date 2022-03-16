@@ -95,13 +95,13 @@ public class MyFrame {
                     String savingFolderPath = pdf_input.getText();
                     String selectedStr = (String) optionSelect.getSelectedItem();
 
-                    if (StringUtils.isEmpty(academicYear)) {
-                        JOptionPane.showMessageDialog(null, "Please enter an academic year.", "Warning", 2);
+                    if ("Select an option".equalsIgnoreCase(selectedStr)) {
+                        JOptionPane.showMessageDialog(null, "Please select an option.", "Warning", 2);
                         return;
                     }
 
-                    if ("Select an option".equalsIgnoreCase(selectedStr)) {
-                        JOptionPane.showMessageDialog(null, "Please select an option.", "Warning", 2);
+                    if (StringUtils.isEmpty(academicYear) && "Generate a PDF".equalsIgnoreCase(selectedStr)) {
+                        JOptionPane.showMessageDialog(null, "Please enter an academic year.", "Warning", 2);
                         return;
                     }
 
