@@ -14,6 +14,8 @@ $ Run test
 $ Package structure
     .
     ├── file -------------------------------- The file folder
+    │   ├── user manual
+    │   │   └── FYP Grading Report Generator User Manual.pdf
     │   ├── input file
     │   │   ├── project marking - Template-v2-PM only.xlsx
     │   │   ├── project marking - Template-v2-JS only.xlsx
