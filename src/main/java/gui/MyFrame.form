@@ -136,8 +136,8 @@
         <properties>
           <model>
             <item value="Select an option"/>
-            <item value="Generate a PDF"/>
-            <item value="Combine files into one"/>
+            <item value="Generate FYP Grading Report PDF"/>
+            <item value="Combine excel files into one"/>
           </model>
         </properties>
       </component>

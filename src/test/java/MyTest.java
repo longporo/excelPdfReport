@@ -40,10 +40,10 @@ public class MyTest {
      */
     private static Object[][] regularData = new Object[][]{
             // id, academicYear, excelFilePath, savingFolderPath, selectedStr
-            {"DT1", "2022", "/Users/aihuishou/Desktop/test/input_excel", "/Users/aihuishou/Desktop/test/output_files/DT1", "Generate a PDF"},
-            {"DT2", "2022", "/Users/aihuishou/Desktop/test/input_excel", "/Users/aihuishou/Desktop/test/output_files/DT2", "Combine files into one"},
-            {"DT3", "2022", "/Users/aihuishou/Desktop/test/input_excel/pm_only.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT3", "Generate a PDF"},
-            {"DT4", "2022", "/Users/aihuishou/Desktop/test/input_excel/pm_only.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT4", "Combine files into one"},
+            {"DT1", "2022", "/Users/aihuishou/Desktop/test/input_excel", "/Users/aihuishou/Desktop/test/output_files/DT1", "Generate FYP Grading Report PDF"},
+            {"DT2", "2022", "/Users/aihuishou/Desktop/test/input_excel", "/Users/aihuishou/Desktop/test/output_files/DT2", "Combine excel files into one"},
+            {"DT3", "2022", "/Users/aihuishou/Desktop/test/input_excel/pm_only.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT3", "Generate FYP Grading Report PDF"},
+            {"DT4", "2022", "/Users/aihuishou/Desktop/test/input_excel/pm_only.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT4", "Combine excel files into one"},
     };
 
     /**
@@ -52,8 +52,8 @@ public class MyTest {
      */
     private static Object[][] faultModelData = new Object[][]{
             // id, academicYear, excelFilePath, savingFolderPath, selectedStr
-            {"DT5*", "2022", "/Users/aihuishou/Desktop/test/input_excel/empty_data.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT5", "Generate a PDF"},
-            {"DT6*", "2022", "/Users/aihuishou/Desktop/test/empty_folder", "/Users/aihuishou/Desktop/test/output_files/DT6", "Generate a PDF"},
+            {"DT5*", "2022", "/Users/aihuishou/Desktop/test/input_excel/empty_data.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT5", "Generate FYP Grading Report PDF"},
+            {"DT6*", "2022", "/Users/aihuishou/Desktop/test/empty_folder", "/Users/aihuishou/Desktop/test/output_files/DT6", "Generate FYP Grading Report PDF"},
     };
 
     @DataProvider(name = "regularData")

@@ -64,10 +64,10 @@ public class MyService {
             }
 
             String fileName = null;
-            if ("Generate a PDF".equalsIgnoreCase(selectedStr)) {
+            if ("Generate FYP Grading Report PDF".equalsIgnoreCase(selectedStr)) {
                 Constant.IS_GENERATE_PDF = true;
                 fileName = "Computer_Science_FYP_Grading_Report_" + academicYear + ".pdf";
-            } else if ("Combine files into one".equalsIgnoreCase(selectedStr)) {
+            } else if ("Combine excel files into one".equalsIgnoreCase(selectedStr)) {
                 Constant.IS_GENERATE_PDF = false;
                 fileName = "project_marking_combined_"  + academicYear + ".xlsx";
             }
