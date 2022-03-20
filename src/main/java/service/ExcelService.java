@@ -33,7 +33,7 @@ public class ExcelService {
     private static final String[][] KEY_ARRAY = {{"grader", "Grader"}, {"projectNo", "Project No."}, {"role", "Role"}, {"otherGrader", "Other grader"}, {"studentName", "Student"}, {"studentNo", "SN."}, {"projectType", "Project type"}, {"credit", "Credit"}, {"grade", "Scr"}, {"abstractScr", "Abstract"}, {"abstractScrX", "/X"}, {"motivation", "Motivation"}, {"motivationX", "/X"}, {"background", "Background"}, {"backgroundX", "/X"}, {"problem", "Problem"}, {"problemX", "/X"}, {"solution", "Solution"}, {"solutionX", "/X"}, {"cte", "Conclusion or Testing and Evaluation"}, {"cteX", "/X"}, {"presentation", "Presentation"}, {"presentationX", "/X"}, {"comment", "Comment"}, {"title", "Title"}};
 
     /**
-     * Get excel data by path<br>
+     * Get Excel data by path<br>
      *
      * @param [excelPath]
      * @return java.util.List<pojo.Student>
@@ -59,10 +59,10 @@ public class ExcelService {
 
         List<Student> stuList = getImportData(fileList);
         if (stuList.size() == 0) {
-            throw new RuntimeException("No data found in the excel file.");
+            throw new RuntimeException("No data found in the Excel file.");
         }
 
-        Constant.logger.info("Successfully parsed excel data...");
+        Constant.logger.info("Successfully parsed Excel data...");
         return stuList;
     }
 

@@ -19,7 +19,7 @@ import java.util.Map;
 public class MyService {
 
     /**
-     * Filter excel file<br>
+     * Filter Excel file<br>
      *
      * @param [file]
      * @return boolean
@@ -38,7 +38,7 @@ public class MyService {
     }
 
     /**
-     * Generate file(pdf or excel) by selection<br>
+     * Generate file(PDF or Excel) by selection<br>
      *
      * @param [academicYear, excelFilePath, savingFolderPath, selectedStr]
      * @return void
@@ -67,7 +67,7 @@ public class MyService {
             if ("Generate FYP Grading Report PDF".equalsIgnoreCase(selectedStr)) {
                 Constant.IS_GENERATE_PDF = true;
                 fileName = "Computer_Science_FYP_Grading_Report_" + academicYear + ".pdf";
-            } else if ("Combine excel files into one".equalsIgnoreCase(selectedStr)) {
+            } else if ("Combine Excel files into one".equalsIgnoreCase(selectedStr)) {
                 Constant.IS_GENERATE_PDF = false;
                 fileName = "project_marking_combined_"  + academicYear + ".xlsx";
             }
@@ -75,7 +75,7 @@ public class MyService {
             // set absolute path
             Constant.TARGET_FILE_PATH = savingFolderPath + Constant.FILE_PATH_NOTATION + fileName;
 
-            Constant.logger.info("Reading excel file...");
+            Constant.logger.info("Reading Excel file...");
 
             List<Student> stuList = ExcelService.getExcelData(excelFilePath);
             if (Constant.IS_GENERATE_PDF) {

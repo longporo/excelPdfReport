@@ -41,9 +41,9 @@ public class MyTest {
     private static Object[][] regularData = new Object[][]{
             // id, academicYear, excelFilePath, savingFolderPath, selectedStr
             {"DT1", "2022", "/Users/aihuishou/Desktop/test/input_excel", "/Users/aihuishou/Desktop/test/output_files/DT1", "Generate FYP Grading Report PDF"},
-            {"DT2", "2022", "/Users/aihuishou/Desktop/test/input_excel", "/Users/aihuishou/Desktop/test/output_files/DT2", "Combine excel files into one"},
+            {"DT2", "2022", "/Users/aihuishou/Desktop/test/input_excel", "/Users/aihuishou/Desktop/test/output_files/DT2", "Combine Excel files into one"},
             {"DT3", "2022", "/Users/aihuishou/Desktop/test/input_excel/pm_only.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT3", "Generate FYP Grading Report PDF"},
-            {"DT4", "2022", "/Users/aihuishou/Desktop/test/input_excel/pm_only.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT4", "Combine excel files into one"},
+            {"DT4", "2022", "/Users/aihuishou/Desktop/test/input_excel/pm_only.xlsx", "/Users/aihuishou/Desktop/test/output_files/DT4", "Combine Excel files into one"},
     };
 
     /**
@@ -81,7 +81,7 @@ public class MyTest {
 
     /**
      * Fault model test<br>
-     * expected exception: java.lang.RuntimeException: No data found in the excel file.<br>
+     * expected exception: java.lang.RuntimeException: No data found in the Excel file.<br>
      *
      * @param [id, academicYear, excelFilePath, savingFolderPath, selectedStr]
      * @return void

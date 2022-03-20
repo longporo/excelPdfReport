@@ -137,7 +137,7 @@
           <model>
             <item value="Select an option"/>
             <item value="Generate FYP Grading Report PDF"/>
-            <item value="Combine excel files into one"/>
+            <item value="Combine Excel files into one"/>
           </model>
         </properties>
       </component>
@@ -157,7 +157,7 @@
             </constraints>
             <properties/>
           </component>
-          <component id="d4bfe" class="javax.swing.JLabel" binding="year_lable">
+          <component id="d4bfe" class="javax.swing.JLabel" binding="year_label">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>

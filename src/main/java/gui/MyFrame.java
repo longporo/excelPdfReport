@@ -43,7 +43,7 @@ public class MyFrame {
     private JComboBox optionSelect;
     private JPanel year_div;
     private JTextField year_input;
-    private JLabel year_lable;
+    private JLabel year_label;
 
     public MyFrame() throws IOException {
 
@@ -56,7 +56,7 @@ public class MyFrame {
         Thread t = new LogToGuiThread(reader);
         t.start();
 
-        // excel file selecting button click event
+        // Excel file selecting button click event
         excel_btn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -109,7 +109,7 @@ public class MyFrame {
                     }
 
                     if (Constant.EXCEL_FILES_SELECTION.equalsIgnoreCase(excelFilePath)) {
-                        JOptionPane.showMessageDialog(null, "Please select excel files or a folder.", "Warning", 2);
+                        JOptionPane.showMessageDialog(null, "Please select Excel files or a folder.", "Warning", 2);
                         return;
                     }
 
@@ -123,13 +123,13 @@ public class MyFrame {
                         return;
                     }
 
-                    // generate file(pdf or excel) by selection
+                    // generate file(PDF or Excel) by selection
                     MyService.genBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
 
                     Constant.logger.info("SUCCESS!!!");
 
                     // ask if open file
-                    confirmResult = JOptionPane.showConfirmDialog(null, "File has been successfully generated! Open it?", "Prompt", 0);
+                    confirmResult = JOptionPane.showConfirmDialog(null, "File has been generated! Open it?", "Prompt", 0);
                     if (confirmResult == 1) {
                         return;
                     }
@@ -151,7 +151,7 @@ public class MyFrame {
      */
     public static void main(String[] args) throws IOException {
         // init frame
-        JFrame frame = new JFrame("Excel PDF Reports");
+        JFrame frame = new JFrame("FYP Grading Report Generator");
         frame.setSize(575, 400);
         frame.setContentPane(new MyFrame().body);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -168,7 +168,7 @@ public class MyFrame {
     }
 
     /**
-     * Show excel file dialog<br>
+     * Show Excel file dialog<br>
      *
      * @param [type]
      * @return java.io.File
@@ -176,7 +176,7 @@ public class MyFrame {
      */
     public File[] showExcelFileDialog() {
         JFileChooser fileChooser = new JFileChooser();
-        // set excel file filter
+        // set Excel file filter
         fileChooser.setAcceptAllFileFilterUsed(false);
         fileChooser.addChoosableFileFilter(new FileFilter() {
             @Override
@@ -189,7 +189,7 @@ public class MyFrame {
 
             @Override
             public String getDescription() {
-                return "folder or excel file (*.xls, *.xlsx)";
+                return "folder or Excel file (*.xls, *.xlsx)";
             }
         });
 
@@ -271,7 +271,7 @@ public class MyFrame {
         final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
         defaultComboBoxModel1.addElement("Select an option");
         defaultComboBoxModel1.addElement("Generate FYP Grading Report PDF");
-        defaultComboBoxModel1.addElement("Combine excel files into one");
+        defaultComboBoxModel1.addElement("Combine Excel files into one");
         optionSelect.setModel(defaultComboBoxModel1);
         body.add(optionSelect, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         year_div = new JPanel();
@@ -279,9 +279,9 @@ public class MyFrame {
         body.add(year_div, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         year_input = new JTextField();
         year_div.add(year_input, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, new Dimension(150, 35), null, 0, false));
-        year_lable = new JLabel();
-        this.$$$loadLabelText$$$(year_lable, ResourceBundle.getBundle("frame").getString("year.input.label"));
-        year_div.add(year_lable, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+        year_label = new JLabel();
+        this.$$$loadLabelText$$$(year_label, ResourceBundle.getBundle("frame").getString("year.input.label"));
+        year_div.add(year_label, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     }
 
     /**
