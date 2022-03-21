@@ -83,7 +83,7 @@ public class PdfService {
                 totalGrade = totalGrade.add(tmpStu.getGrade());
                 count++;
             }
-            BigDecimal avgGrade = totalGrade.divide(new BigDecimal(count)).setScale(1, BigDecimal.ROUND_UP);
+            BigDecimal avgGrade = totalGrade.divide(new BigDecimal(count), 1, BigDecimal.ROUND_UP);
             tmpStu.setAvgGrade(avgGrade);
             tmpStu.setGraderMap(graderMap);
             setStuList.add(tmpStu);

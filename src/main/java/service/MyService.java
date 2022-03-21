@@ -44,48 +44,43 @@ public class MyService {
      * @return void
      * @author Zihao Long
      */
-    public static void genBySelection(String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) {
-        try {
-            // set academic year
-            Constant.ACADEMIC_YEAR = academicYear;
-            Constant.GRADING_REPORT_PAGE_TITLE = "MU Computer Science FYP Grading Report " + academicYear;
+    public static void genBySelection(String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) throws Exception {
+        // set academic year
+        Constant.ACADEMIC_YEAR = academicYear;
+        Constant.GRADING_REPORT_PAGE_TITLE = "MU Computer Science FYP Grading Report " + academicYear;
 
-            // get system info
-            if ( Constant.FILE_PATH_NOTATION == null) {
-                String osName = System.getProperty("os.name");
-                if (osName.startsWith("Windows")) {
-                    Constant.IS_WINDOWS = true;
-                    Constant.FILE_PATH_NOTATION = "\\";
-                } else {
-                    // MacOs, linux
-                    Constant.IS_MAC_OS = true;
-                    Constant.FILE_PATH_NOTATION = "/";
-                }
-            }
-
-            String fileName = null;
-            if ("Generate FYP Grading Report PDF".equalsIgnoreCase(selectedStr)) {
-                Constant.IS_GENERATE_PDF = true;
-                fileName = "Computer_Science_FYP_Grading_Report_" + academicYear + ".pdf";
-            } else if ("Combine Excel files into one".equalsIgnoreCase(selectedStr)) {
-                Constant.IS_GENERATE_PDF = false;
-                fileName = "project_marking_combined_"  + academicYear + ".xlsx";
-            }
-
-            // set absolute path
-            Constant.TARGET_FILE_PATH = savingFolderPath + Constant.FILE_PATH_NOTATION + fileName;
-
-            Constant.logger.info("Reading Excel file...");
-
-            List<Student> stuList = ExcelService.getExcelData(excelFilePath);
-            if (Constant.IS_GENERATE_PDF) {
-                PdfService.generatePdf(stuList);
+        // get system info
+        if ( Constant.FILE_PATH_NOTATION == null) {
+            String osName = System.getProperty("os.name");
+            if (osName.startsWith("Windows")) {
+                Constant.IS_WINDOWS = true;
+                Constant.FILE_PATH_NOTATION = "\\";
             } else {
-                ExcelService.combineToFile(stuList);
+                // MacOs, linux
+                Constant.IS_MAC_OS = true;
+                Constant.FILE_PATH_NOTATION = "/";
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            Constant.logger.error(e.getMessage());
+        }
+
+        String fileName = null;
+        if ("Generate FYP Grading Report PDF".equalsIgnoreCase(selectedStr)) {
+            Constant.IS_GENERATE_PDF = true;
+            fileName = "Computer_Science_FYP_Grading_Report_" + academicYear + ".pdf";
+        } else if ("Combine Excel files into one".equalsIgnoreCase(selectedStr)) {
+            Constant.IS_GENERATE_PDF = false;
+            fileName = "Project_Marking_Combined_"  + academicYear + ".xlsx";
+        }
+
+        // set absolute path
+        Constant.TARGET_FILE_PATH = savingFolderPath + Constant.FILE_PATH_NOTATION + fileName;
+
+        Constant.logger.info("Reading Excel file...");
+
+        List<Student> stuList = ExcelService.getExcelData(excelFilePath);
+        if (Constant.IS_GENERATE_PDF) {
+            PdfService.generatePdf(stuList);
+        } else {
+            ExcelService.combineToFile(stuList);
         }
     }
 

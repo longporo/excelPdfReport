@@ -74,7 +74,7 @@ public class MyTest {
      * @author Zihao Long
      */
     @Test(dataProvider = "regularData")
-    public void regularTest(String id, String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) {
+    public void regularTest(String id, String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) throws Exception {
         Logger.getRootLogger().setLevel(Level.OFF);
         MyService.genBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
     }
@@ -87,8 +87,8 @@ public class MyTest {
      * @return void
      * @author Zihao Long
      */
-    @Test(dataProvider = "faultModelData")
-    public void faultModelTest(String id, String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) {
+    @Test(dataProvider = "faultModelData", expectedExceptions = RuntimeException.class)
+    public void faultModelTest(String id, String academicYear, String excelFilePath, String savingFolderPath, String selectedStr) throws Exception {
         Logger.getRootLogger().setLevel(Level.OFF);
         MyService.genBySelection(academicYear, excelFilePath, savingFolderPath, selectedStr);
     }

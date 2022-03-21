@@ -134,7 +134,7 @@ public class MyFrame {
                         return;
                     }
                     MyService.openFile(Constant.TARGET_FILE_PATH);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     Constant.logger.error(e.getMessage());
                 }
