@@ -135,8 +135,9 @@ public class MyFrame {
                     }
                     MyService.openFile(Constant.TARGET_FILE_PATH);
                 } catch (Exception e) {
+                    JOptionPane.showMessageDialog(null, "See the logging pane for details", "System Error", JOptionPane.ERROR_MESSAGE);
+                    Constant.logger.error(e.toString());
                     e.printStackTrace();
-                    Constant.logger.error(e.getMessage());
                 }
             }
         });

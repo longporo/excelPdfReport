@@ -22,7 +22,7 @@ $ Package structure
     │   │   └── project marking - Template-v3-PO only.xlsx
     │   └── output file
     │       ├── Computer_Science_FYP_Grading_Report_2022.pdf
-    │       └── project_marking_combined_2022.xlsx
+    │       └── Project_Marking_Combined_2022.xlsx
     ├── README.txt
     ├── pom.xml ----------------------------- Maven configuration XML
     └── src
