@@ -128,12 +128,7 @@ public class MyFrame {
 
                     Constant.logger.info("SUCCESS!!!");
 
-                    // ask if open file
-                    confirmResult = JOptionPane.showConfirmDialog(null, "File has been generated! Open it?", "Prompt", 0);
-                    if (confirmResult == 1) {
-                        return;
-                    }
-                    MyService.openFile(Constant.TARGET_FILE_PATH);
+                    JOptionPane.showMessageDialog(null, "File has been generated!", "Tips", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(null, "See the logging pane for details", "System Error", JOptionPane.ERROR_MESSAGE);
                     Constant.logger.error(e.toString());

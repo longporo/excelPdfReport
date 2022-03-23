@@ -4,7 +4,6 @@ import pojo.Student;
 import util.Constant;
 
 import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -81,21 +80,6 @@ public class MyService {
             PdfService.generatePdf(stuList);
         } else {
             ExcelService.combineToFile(stuList);
-        }
-    }
-
-    /**
-     * Open file by command line<br>
-     *
-     * @param []
-     * @return void
-     * @author Zihao Long
-     */
-    public static void openFile(String filePath) throws IOException {
-        if (Constant.IS_WINDOWS) {
-            Runtime.getRuntime().exec("explorer.exe /select, " + filePath);
-        } else if (Constant.IS_MAC_OS) {
-            Runtime.getRuntime().exec("open " + filePath);
         }
     }
 
