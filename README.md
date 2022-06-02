@@ -9,6 +9,8 @@ The projects are written in Java language and managed with [Maven](https://maven
 
 This one is the <strong>FYP Grading Report Generator</strong> project.
 
+A [user manual](https://longporo.slite.com/p/note/QhNfpiJBwx_ijfvsNlJxXN) is available as well.
+
 The libraries used are shown as below.
 
 <img width="731" alt="library" src="https://user-images.githubusercontent.com/42689061/170313044-d6ed76ae-2915-42c0-908c-410af7dc7dde.png">
