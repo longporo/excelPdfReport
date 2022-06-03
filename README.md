@@ -17,6 +17,8 @@ The output PDF: [Computer_Science_FYP_Grading_Report_2022.pdf](https://github.co
 
 # Techniques
 
+Technical Information: `Java, Java Swing, Desktop Application, Maven, Apach POI, Log4J, iText 7, JFreeChart`
+
 ## Architecture
 This application takes Excel files containing students' final year project(FYP) grades as input and produces a well-formatted PDF as output. The application can also combine the imported Excel files into one Excel file and output it. The component diagram and class diagram bellow descript the two main features.
 
